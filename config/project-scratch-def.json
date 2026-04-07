@@ -9,6 +9,9 @@
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true
     },
+    "quoteSettings": {
+      "enableQuote": true
+    },
     "securitySettings": {
       "sessionSettings": {
         "forceRelogin": false

@@ -1,0 +1,48 @@
+<template>
+    <lightning-card title="Products" icon-name="standard:product_item">
+        <div class="slds-m-around_medium">
+            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                <div class="slds-col">
+                    <lightning-button label="New Product" variant="brand" onclick={handleNewProduct}></lightning-button>
+                </div>
+            </div>
+
+            <div style="height: 300px;">
+                <lightning-datatable
+                    key-field="Id"
+                    data={products}
+                    columns={columns}
+                    draft-values={draftValues}
+                    onsave={handleSave}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column
+                ></lightning-datatable>
+            </div>
+        </div>
+    </lightning-card>
+
+    <!-- New Product Modal -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-labelledby="prod-modal-heading" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" size="small"></lightning-icon>
+                    </button>
+                    <h2 id="prod-modal-heading" class="slds-modal__title slds-hyphenate">New Product</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="prod-modal-content">
+                    <lightning-input label="Product Name" required data-field="name" value={newProduct.name} onchange={handleModalFieldChange}></lightning-input>
+                    <lightning-input label="Product Code" data-field="productCode" value={newProduct.productCode} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-input>
+                    <lightning-textarea label="Description" data-field="description" value={newProduct.description} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-textarea>
+                    <lightning-combobox label="Family" value={newProduct.family} options={familyOptions} onchange={handleModalFamilyChange} class="slds-m-top_small"></lightning-combobox>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+                    <lightning-button variant="brand" label="Save" onclick={handleSaveNewProduct} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+</template>

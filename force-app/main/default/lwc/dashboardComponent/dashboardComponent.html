@@ -1,0 +1,215 @@
+<template>
+    <div class="premium-card">
+        <div class="premium-header">
+            <div class="premium-header-content">
+                <lightning-icon icon-name="standard:sun" size="medium" class="premium-header-icon" variant="inverse"></lightning-icon>
+                <h1>Good evening, Priyanshi !</h1>
+            </div>
+        </div>
+
+        <div class="premium-content">
+            <!-- Quote Insights Cards -->
+            <div class="dashboard-insights-grid">
+                <!-- Awaiting Your Approval -->
+                <div>
+                    <div class="insight-card awaiting">
+                        <h3 class="slds-text-heading_large">{insights.awaitingApproval.count}</h3>
+                        <p class="slds-text-title slds-m-bottom_small">Awaiting Your Approval</p>
+                        <p class="slds-text-body_small">
+                            <lightning-formatted-number
+                                value={insights.awaitingApproval.amount}
+                                format-style="currency"
+                                currency-code="USD"
+                            ></lightning-formatted-number> pending your review
+                        </p>
+                        <lightning-button
+                            label="Review Now"
+                            variant="base"
+                            onclick={handleReviewNow}
+                        ></lightning-button>
+                    </div>
+                </div>
+                
+                <!-- Low Margin Drafts -->
+                <div>
+                    <div class="insight-card low-margin">
+                        <h3 class="slds-text-heading_large">{insights.lowMargin.count}</h3>
+                        <p class="slds-text-title slds-m-bottom_small">Low Margin Drafts</p>
+                        <p class="slds-text-body_small">
+                            <lightning-formatted-number
+                                value={insights.lowMargin.amount}
+                                format-style="currency"
+                                currency-code="USD"
+                            ></lightning-formatted-number> draft quotes at risk - margins below 15%
+                        </p>
+                        <lightning-button
+                            label="Review Margins"
+                            variant="base"
+                            onclick={handleReviewMargins}
+                        ></lightning-button>
+                    </div>
+                </div>
+                
+                <!-- Draft Pipeline -->
+                <div>
+                    <div class="insight-card draft">
+                        <h3 class="slds-text-heading_large">{insights.draftPipeline.count}</h3>
+                        <p class="slds-text-title slds-m-bottom_small">Draft Pipeline</p>
+                        <p class="slds-text-body_small">
+                            <lightning-formatted-number
+                                value={insights.draftPipeline.amount}
+                                format-style="currency"
+                                currency-code="USD"
+                            ></lightning-formatted-number> potential revenue in drafts
+                        </p>
+                        <lightning-button
+                            label="View Drafts"
+                            variant="base"
+                            onclick={handleViewDrafts}
+                        ></lightning-button>
+                    </div>
+                </div>
+                
+                <!-- High Margin Deals -->
+                <div>
+                    <div class="insight-card high-margin">
+                        <h3 class="slds-text-heading_large">{insights.highMargin.count}</h3>
+                        <p class="slds-text-title slds-m-bottom_small">High Margin Deals</p>
+                        <p class="slds-text-body_small">
+                            <lightning-formatted-number
+                                value={insights.highMargin.amount}
+                                format-style="currency"
+                                currency-code="USD"
+                            ></lightning-formatted-number> with 35%+ profit margin
+                        </p>
+                        <lightning-button
+                            label="View Opportunities"
+                            variant="base"
+                            onclick={handleViewOpportunities}
+                        ></lightning-button>
+                    </div>
+                </div>
+                
+                <!-- Won This Month -->
+                <div>
+                    <div class="insight-card won">
+                        <h3 class="slds-text-heading_large">{insights.wonThisMonth.count}</h3>
+                        <p class="slds-text-title slds-m-bottom_small">Won This Month</p>
+                        <p class="slds-text-body_small">
+                            <lightning-formatted-number
+                                value={insights.wonThisMonth.amount}
+                                format-style="currency"
+                                currency-code="USD"
+                            ></lightning-formatted-number> closed won this month
+                        </p>
+                        <lightning-button
+                            label="View Wins"
+                            variant="base"
+                            onclick={handleViewWins}
+                        ></lightning-button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Quotes Section -->
+            <div class="slds-m-top_medium">
+                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
+                    <h3 class="slds-col slds-text-heading_medium">Your Recent Quotes</h3>
+                    <div class="slds-col_bump-left">
+                        <lightning-button
+                            label="Create New Quote"
+                            variant="brand"
+                            icon-name="utility:add"
+                            onclick={handleCreateQuote}
+                        ></lightning-button>
+                    </div>
+                </div>
+                
+                <template if:true={recentQuotes.length}>
+                    <div class="datatable-container">
+                        <lightning-datatable
+                            key-field="Id"
+                            data={recentQuotes}
+                            columns={columns}
+                            hide-checkbox-column
+                        ></lightning-datatable>
+                    </div>
+                </template>
+                
+                <template if:false={recentQuotes.length}>
+                    <div class="slds-text-align_center slds-m-vertical_large">
+                        <lightning-icon 
+                            icon-name="utility:dayview" 
+                            alternative-text="Sun Icon" 
+                            title="Sun">
+                        </lightning-icon>
+                        <p class="slds-m-top_small" style="color: var(--text-muted);">No recent quote activity.</p>
+                    </div>
+                </template>
+            </div>
+
+            <!-- New Quote Modal -->
+            <template if:true={isQuoteModalOpen}>
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content" class="slds-modal slds-fade-in-open slds-modal_small dark-modal">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeCreateQuoteModal}>
+                                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                            <h2 id="modal-heading" class="slds-modal__title slds-hyphenate">New Quote</h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium custom-form" id="modal-content">
+                            <lightning-record-edit-form object-api-name="Quote" onsuccess={handleQuoteCreated}>
+                                <lightning-messages></lightning-messages>
+                                <div class="slds-grid slds-wrap slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <div class="custom-field">
+                                            <label><span class="required">*</span> Quote Name</label>
+                                            <lightning-input-field field-name="Name" required variant="label-hidden"></lightning-input-field>
+                                        </div>
+                                        <div class="custom-field">
+                                            <label><span class="required">*</span> Opportunity Name</label>
+                                            <lightning-input-field field-name="OpportunityId" required variant="label-hidden"></lightning-input-field>
+                                        </div>
+                                        <div class="custom-field">
+                                            <label>Expiration Date</label>
+                                            <lightning-input-field field-name="ExpirationDate" variant="label-hidden"></lightning-input-field>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <div class="custom-field">
+                                            <label>Status</label>
+                                            <lightning-input-field field-name="Status" variant="label-hidden"></lightning-input-field>
+                                        </div>
+                                        <div class="custom-field">
+                                            <label>Quote Time Period</label>
+                                            <lightning-input-field field-name="Quote_Time_Period__c" variant="label-hidden" data-id="timePeriod" value={quoteTimePeriod} onchange={handleDateCalcChange}></lightning-input-field>
+                                        </div>
+                                        <div class="custom-field">
+                                            <label>Start Date</label>
+                                            <lightning-input-field field-name="Start_Date__c" variant="label-hidden" data-id="startDate" value={quoteStartDate} onchange={handleDateCalcChange}></lightning-input-field>
+                                        </div>
+                                        <div class="custom-field">
+                                            <label>End Date</label>
+                                            <lightning-input-field field-name="End_Date__c" variant="label-hidden" data-id="endDate" value={quoteEndDate}></lightning-input-field>
+                                        </div>
+                                        <div class="custom-field">
+                                            <label>Description</label>
+                                            <lightning-input-field field-name="Description" variant="label-hidden"></lightning-input-field>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-m-top_medium slds-text-align_right">
+                                    <lightning-button class="slds-m-right_small" label="Cancel" onclick={closeCreateQuoteModal}></lightning-button>
+                                    <lightning-button variant="brand" type="submit" label="Save"></lightning-button>
+                                </div>
+                            </lightning-record-edit-form>
+                        </div>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+            </template>
+        </div>
+    </div>
+</template>

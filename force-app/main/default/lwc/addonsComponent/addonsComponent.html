@@ -1,0 +1,49 @@
+<template>
+    <lightning-card title="Add-ons" icon-name="standard:service_contract">
+        <div class="slds-m-around_medium">
+            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                <div class="slds-col">
+                    <lightning-button label="New Add-on" variant="brand" onclick={handleNewAddon}></lightning-button>
+                </div>
+            </div>
+
+            <div style="height: 300px;">
+                <lightning-datatable
+                    key-field="Id"
+                    data={addons}
+                    columns={columns}
+                    draft-values={draftValues}
+                    onsave={handleSave}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column
+                ></lightning-datatable>
+            </div>
+        </div>
+    </lightning-card>
+
+    <!-- New Add-on Modal -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-labelledby="addon-modal-heading" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" size="small"></lightning-icon>
+                    </button>
+                    <h2 id="addon-modal-heading" class="slds-modal__title slds-hyphenate">New Add-on</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="addon-modal-content">
+                    <lightning-input label="Add-on Name" required data-field="name" value={newAddon.name} onchange={handleModalFieldChange}></lightning-input>
+                    <lightning-input label="Price" type="number" formatter="currency" step="0.01" data-field="price" value={newAddon.price} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-input>
+                    <lightning-input label="Cost" type="number" formatter="currency" step="0.01" data-field="cost" value={newAddon.cost} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-input>
+                    <lightning-combobox label="Billing Unit" value={newAddon.billingUnit} options={billingUnitOptions} onchange={handleModalBillingChange} class="slds-m-top_small"></lightning-combobox>
+                    <lightning-textarea label="Description" data-field="description" value={newAddon.description} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+                    <lightning-button variant="brand" label="Save" onclick={handleSaveNewAddon} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+</template>

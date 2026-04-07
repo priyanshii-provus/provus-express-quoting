@@ -1,0 +1,147 @@
+<template>
+    <div class="settings-container">
+        <!-- Sidebar -->
+        <nav class="settings-sidebar">
+            <h2 class="sidebar-title slds-text-heading_medium slds-m-bottom_small" style="font-weight:600;">Settings
+                <span class="slds-text-body_small slds-text-color_weak slds-show" style="font-weight:normal;">Manage your application preferences and organization settings</span>
+            </h2>
+            <ul class="slds-nav-vertical">
+                <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action"><lightning-icon icon-name="utility:settings" size="x-small" class="slds-m-right_small"></lightning-icon>General</a></li>
+                <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action"><lightning-icon icon-name="utility:company" size="x-small" class="slds-m-right_small"></lightning-icon>Company Info</a></li>
+                <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action"><lightning-icon icon-name="utility:page" size="x-small" class="slds-m-right_small"></lightning-icon>PDF</a></li>
+                <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action"><lightning-icon icon-name="utility:link" size="x-small" class="slds-m-right_small"></lightning-icon>Integrations</a></li>
+                <li class="slds-nav-vertical__item slds-is-active"><a href="javascript:void(0);" class="slds-nav-vertical__action"><lightning-icon icon-name="utility:groups" size="x-small" class="slds-m-right_small" variant="inverse"></lightning-icon>Users</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="settings-content">
+            <div class="header slds-m-bottom_large slds-grid slds-grid_vertical-align-center slds-grid_align-spread">
+                <div class="slds-media slds-media_center">
+                    <div class="slds-media__figure">
+                        <lightning-icon icon-name="utility:groups" size="medium" class="header-icon slds-m-right_small"></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        <h1 class="slds-text-heading_medium" style="font-weight:600;">Manage Your Team</h1>
+                        <p class="slds-text-color_weak slds-text-body_small">Manage user access, roles, and permissions.</p>
+                    </div>
+                </div>
+                <div class="slds-col_bump-left">
+                    <lightning-button label="Team Member" icon-name="utility:add" variant="brand" onclick={handleAddMember}></lightning-button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-container slds-grid slds-m-bottom_medium slds-p-around_medium">
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="slds-text-heading_large slds-m-bottom_xxx-small" style="font-weight:700;">{totalSeats}</div>
+                    <div class="slds-text-color_weak slds-text-title_caps slds-text-body_small">TOTAL SEATS</div>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="slds-text-heading_large slds-m-bottom_xxx-small" style="font-weight:700;">{usedSeats}</div>
+                    <div class="slds-text-color_weak slds-text-title_caps slds-text-body_small">USED SEATS</div>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="slds-text-heading_large slds-m-bottom_xxx-small" style="font-weight:700;">{availableSeats}</div>
+                    <div class="slds-text-color_weak slds-text-title_caps slds-text-body_small">AVAILABLE</div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="table-container slds-m-top_large">
+                <template if:true={users}>
+                    <lightning-datatable
+                        key-field="Id"
+                        data={users}
+                        columns={columns}
+                        hide-checkbox-column
+                        onrowaction={handleRowAction}>
+                    </lightning-datatable>
+                </template>
+                <template if:true={error}>
+                    <div class="slds-text-color_error slds-p-around_medium">{error}</div>
+                </template>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Team Member Modal / Panel -->
+    <template if:true={isEditModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open side-panel-modal">
+            <div class="slds-modal__container">
+                <div class="slds-modal__content slds-p-around_large slds-is-relative">
+                    <header class="slds-m-bottom_large">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeEditModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                        </button>
+                        <h2 class="slds-text-heading_medium slds-hyphenate" style="font-weight:600;">{modalTitle}</h2>
+                        <p class="slds-text-color_weak slds-m-top_xx-small">Update user details and role assignments.</p>
+                    </header>
+                    
+                    <div class="form-container slds-m-bottom_xx-large">
+                        <lightning-input label="First Name" value={selectedUser.FirstName} name="FirstName" onchange={handleInputChange} class="slds-m-bottom_small"></lightning-input>
+                        <lightning-input label="Last Name" value={selectedUser.LastName} name="LastName" onchange={handleInputChange} class="slds-m-bottom_small"></lightning-input>
+                        <lightning-input label="Email" value={selectedUser.Email} name="Email" onchange={handleInputChange} class="slds-m-bottom_small"></lightning-input>
+                        <lightning-input label="Username" value={selectedUser.Username} name="Username" onchange={handleInputChange} disabled={isUpdatingUser} class="slds-m-bottom_medium"></lightning-input>
+
+                        <div class="role-selector slds-m-bottom_large">
+                            <label class="slds-form-element__label slds-text-title_caps slds-m-bottom_x-small" style="display:block;">Role *</label>
+                            <span class="slds-text-body_small slds-text-color_weak slds-m-bottom_small" style="display:block;">Choose a role to control access and responsibilities.</span>
+                            
+                            <fieldset class="slds-form-element">
+                                <div class="slds-form-element__control slds-grid slds-grid_vertical">
+                                    
+                                    <div class={adminOptionClass} onclick={selectAdminRole}>
+                                        <span class="slds-radio slds-m-right_x-small">
+                                            <input type="radio" id="role-admin" checked={isRoleAdmin} value="Admin" name="options" />
+                                            <label class="slds-radio__label" for="role-admin">
+                                                <span class="slds-radio_faux"></span>
+                                            </label>
+                                        </span>
+                                        <div>
+                                            <span class="slds-form-element__label slds-text-heading_small slds-m-bottom_none" style="font-weight: 600;">Admin</span>
+                                            <div class="slds-text-body_small slds-text-color_weak slds-m-top_xxx-small">Full settings access and all Manager/User capabilities.</div>
+                                        </div>
+                                    </div>
+
+                                    <div class={managerOptionClass} onclick={selectManagerRole}>
+                                        <span class="slds-radio slds-m-right_x-small">
+                                            <input type="radio" id="role-manager" checked={isRoleManager} value="Manager" name="options" />
+                                            <label class="slds-radio__label" for="role-manager">
+                                                <span class="slds-radio_faux"></span>
+                                            </label>
+                                        </span>
+                                        <div>
+                                            <span class="slds-form-element__label slds-text-heading_small slds-m-bottom_none" style="font-weight: 600;">Manager</span>
+                                            <div class="slds-text-body_small slds-text-color_weak slds-m-top_xxx-small">Can approve/reject quotes and manage team data while inheriting User access.</div>
+                                        </div>
+                                    </div>
+
+                                    <div class={userOptionClass} onclick={selectUserRole}>
+                                        <span class="slds-radio slds-m-right_x-small">
+                                            <input type="radio" id="role-user" checked={isRoleUser} value="User" name="options" />
+                                            <label class="slds-radio__label" for="role-user">
+                                                <span class="slds-radio_faux"></span>
+                                            </label>
+                                        </span>
+                                        <div>
+                                            <span class="slds-form-element__label slds-text-heading_small slds-m-bottom_none" style="font-weight: 600;">User</span>
+                                            <div class="slds-text-body_small slds-text-color_weak slds-m-top_xxx-small">Can edit own quotes, view others read-only, and manage catalog/account data.</div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <footer class="slds-modal__footer slds-grid slds-grid_align-spread panel-footer">
+                        <button class="slds-button slds-button_neutral" onclick={closeEditModal}>Cancel</button>
+                        <button class="slds-button slds-button_brand" onclick={handleUpdateRole}>{modalButtonLabel}</button>
+                    </footer>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

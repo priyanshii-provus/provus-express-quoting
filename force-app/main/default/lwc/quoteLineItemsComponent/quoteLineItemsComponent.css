@@ -1,0 +1,136 @@
+:host {
+    --primary-color: #0176d3;
+    --primary-light: #0b5cab;
+    --secondary-color: #1b96ff;
+    --bg-dark: #f3f4f6;
+    --card-bg: #ffffff;
+    --text-main: #080707;
+    --text-muted: #475569;
+    --success-color: #04844b;
+    --danger-color: #ea001e;
+    --border-color: #e5e7eb;
+    
+    /* Strict Label Propagation for Modals */
+    --lwc-formLabelTextColor: var(--text-muted);
+    --lwc-colorTextLabel: var(--text-muted);
+    --sds-c-input-label-color: var(--text-muted);
+    --sds-c-input-label-text-color: var(--text-muted);
+    
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: block;
+}
+
+.premium-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin: 1rem 0;
+    color: var(--text-main);
+}
+
+.premium-header {
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.premium-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.premium-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.premium-header-icon {
+    --sds-c-icon-color-foreground-default: var(--secondary-color);
+    background: rgba(1, 118, 211, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.premium-content {
+    background: var(--bg-dark);
+    padding: 2rem;
+}
+
+.datatable-container {
+    background: #ffffff;
+    --lwc-colorTextDefault: #000000;
+    border-radius: 8px;
+    padding: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+    height: 350px;
+    overflow: hidden;
+}
+
+/* Modals dark theme styling */
+.dark-modal .slds-modal__container {
+    --sds-c-modal-color-background: var(--card-bg);
+    --sds-c-modal-text-color: var(--text-main);
+    /* Input Label Overrides */
+    --lwc-formLabelTextColor: var(--text-muted);
+    --lwc-colorTextLabel: var(--text-muted);
+    border-radius: 12px;
+}
+.dark-modal .slds-modal__header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    border-radius: 12px 12px 0 0;
+}
+.dark-modal .slds-modal__title {
+    font-weight: 700;
+}
+.dark-modal .slds-modal__content {
+    background-color: var(--card-bg);
+    color: var(--text-main);
+}
+.dark-modal .slds-modal__footer {
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    border-radius: 0 0 12px 12px;
+}
+.dark-modal lightning-input, 
+.dark-modal lightning-combobox {
+    --sds-c-input-color-background: #ffffff;
+    --sds-c-input-text-color: #0f172a;
+    --sds-c-input-color-border: var(--border-color);
+}
+
+.custom-form .custom-field {
+    margin-bottom: 1.25rem;
+}
+
+.custom-form label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted) !important;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.custom-form .required {
+    color: var(--danger-color);
+    margin-right: 0.15rem;
+    font-size: 0.85rem;
+}

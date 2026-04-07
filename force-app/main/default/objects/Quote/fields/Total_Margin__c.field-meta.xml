@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Margin__c</fullName>
+    <label>Total Margin</label>
+    <type>Currency</type>
+    <precision>16</precision>
+    <scale>2</scale>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <formula>TotalPrice - Total_Cost__c</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <description>Total margin: TotalPrice minus Total Cost</description>
+</CustomField>

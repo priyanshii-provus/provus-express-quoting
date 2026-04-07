@@ -1,0 +1,101 @@
+<template>
+    <div class="premium-card">
+        <div class="premium-header">
+            <div class="premium-header-content">
+                <lightning-icon icon-name="standard:product" size="medium" class="premium-header-icon" variant="inverse"></lightning-icon>
+                <h1>Quote Line Items</h1>
+            </div>
+            <div class="header-actions">
+                <lightning-button label="Add Product" icon-name="utility:add" onclick={handleAddProduct} class="slds-m-right_small"></lightning-button>
+                <lightning-button label="Add Resource" icon-name="utility:user" onclick={handleAddResource}></lightning-button>
+            </div>
+        </div>
+
+        <div class="premium-content">
+            <!-- Editable Datatable -->
+            <div class="datatable-container">
+                <lightning-datatable
+                    key-field="Id"
+                    data={lineItems}
+                    columns={columns}
+                    draft-values={draftValues}
+                    onsave={handleSave}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column
+                ></lightning-datatable>
+            </div>
+            
+            <!-- Modal logic for Picker here -->
+            <!-- Add Product Modal -->
+            <template if:true={isProductModalOpen}>
+                <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open dark-modal">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeProductModal}>
+                                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                            </button>
+                            <h2 class="slds-modal__title slds-hyphenate">Add Product</h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium custom-form">
+                            <div class="custom-field">
+                                <label><span class="required">*</span> Select Product</label>
+                                <lightning-combobox variant="label-hidden" options={productOptions} value={selectedPBEId} onchange={handleProductChange} required></lightning-combobox>
+                            </div>
+                            <div class="custom-field">
+                                <label><span class="required">*</span> Quantity</label>
+                                <lightning-input variant="label-hidden" type="number" value={productQuantity} onchange={handleProductQuantityChange} required></lightning-input>
+                            </div>
+                            <div class="custom-field">
+                                <label>Unit Price (Calculated)</label>
+                                <lightning-input variant="label-hidden" type="number" formatter="currency" step="0.01" value={productUnitPrice} read-only></lightning-input>
+                            </div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <lightning-button label="Cancel" onclick={closeProductModal}></lightning-button>
+                            <lightning-button variant="brand" label="Save" onclick={handleSaveProduct} class="slds-m-left_x-small"></lightning-button>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </template>
+
+            <!-- Add Resource Modal -->
+            <template if:true={isResourceModalOpen}>
+                <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open dark-modal">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeResourceModal}>
+                                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small"></lightning-icon>
+                            </button>
+                            <h2 class="slds-modal__title slds-hyphenate">Add Resource</h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium custom-form">
+                            <div class="custom-field">
+                                <label><span class="required">*</span> Select Role</label>
+                                <lightning-combobox variant="label-hidden" options={resourceOptions} value={selectedRoleId} onchange={handleResourceChange} required></lightning-combobox>
+                            </div>
+                            <div class="custom-field">
+                                <label><span class="required">*</span> Duration (Months)</label>
+                                <lightning-input variant="label-hidden" type="number" step="0.01" value={resourceQuantity} onchange={handleResourceQuantityChange} required></lightning-input>
+                            </div>
+
+                            <div class="custom-field">
+                                <label>Unit Price (Calculated)</label>
+                                <lightning-input variant="label-hidden" type="number" formatter="currency" step="0.01" value={resourceUnitPrice} read-only></lightning-input>
+                            </div>
+                            <div class="custom-field">
+                                <label>Phase</label>
+                                <lightning-input variant="label-hidden" type="text" value={resourcePhase} onchange={handleResourcePhaseChange}></lightning-input>
+                            </div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <lightning-button label="Cancel" onclick={closeResourceModal}></lightning-button>
+                            <lightning-button variant="brand" label="Save" onclick={handleSaveResource} class="slds-m-left_x-small"></lightning-button>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </template>
+        </div>
+    </div>
+</template>

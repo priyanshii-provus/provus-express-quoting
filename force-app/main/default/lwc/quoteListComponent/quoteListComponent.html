@@ -1,0 +1,35 @@
+<template>
+    <lightning-card title="Quotes" icon-name="standard:quotes">
+        <div class="slds-m-around_medium">
+            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-input
+                        type="search"
+                        placeholder="Search Quotes..."
+                        onchange={handleSearch}
+                    ></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-combobox
+                        name="statusFilter"
+                        label="Filter by Status"
+                        value={statusFilter}
+                        placeholder="All Statuses"
+                        options={statusOptions}
+                        onchange={handleFilterChange}
+                    ></lightning-combobox>
+                </div>
+            </div>
+            
+            <div style="height: 300px;">
+                <lightning-datatable
+                    key-field="Id"
+                    data={filteredQuotes}
+                    columns={columns}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column
+                ></lightning-datatable>
+            </div>
+        </div>
+    </lightning-card>
+</template>
