@@ -1,162 +1,173 @@
 :host {
-    --sidebar-width: 220px;
-    --active-color: #2563eb;
-    --hover-bg: #eff6ff;
-    --bg-main: #f9fafb;
-    --text-color: #4b5563;
-    --text-dark: #1f2937;
-    --border-color: #e5e7eb;
-    --sidebar-bg: #ffffff;
+  --sidebar-width: 220px;
+  --active-color: #2563eb;
+  --hover-bg: #eff6ff;
+  --bg-main: #f9fafb;
+  --text-color: #4b5563;
+  --text-dark: #1f2937;
+  --border-color: #e5e7eb;
+  --sidebar-bg: #ffffff;
 
-    display: block;
-    height: 100%;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: block;
+  height: 100%;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 /* ── Layout ────────────────────────── */
 .app-layout {
-    display: flex;
-    flex-direction: row;
-    height: 100%;
-    min-height: calc(100vh - 120px);
-    background-color: var(--bg-main);
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  min-height: calc(100vh - 120px);
+  background-color: var(--bg-main);
 }
 
 /* ── Sidebar ───────────────────────── */
 .sidebar {
-    width: var(--sidebar-width);
-    flex-shrink: 0;
-    background-color: var(--sidebar-bg);
-    border-right: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 1rem 0.75rem;
-    overflow-y: auto;
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem 0.75rem;
+  overflow-y: auto;
 }
 
 .sidebar-top {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .sidebar-bottom {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-top: auto;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
 }
 
 /* ── Nav Item ──────────────────────── */
 .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.6rem 0.85rem;
-    text-decoration: none;
-    color: var(--text-dark);
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 0.875rem;
-    line-height: 1.25;
-    transition: background-color 0.15s ease, color 0.15s ease;
-    cursor: pointer;
-    user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.85rem;
+  text-decoration: none;
+  color: var(--text-dark);
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+  cursor: pointer;
+  user-select: none;
 }
 
 .nav-item lightning-icon {
-    flex-shrink: 0;
-    --sds-c-icon-color-foreground-default: var(--text-color);
+  flex-shrink: 0;
+  --sds-c-icon-color-foreground-default: var(--text-color);
 }
 
 .nav-item:hover {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .nav-item:hover:not(.active) {
-    background-color: var(--hover-bg);
+  background-color: var(--hover-bg);
 }
 
 .nav-item.active {
-    background-color: var(--active-color);
-    color: #ffffff;
-    font-weight: 600;
+  background-color: var(--active-color);
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .nav-item.active lightning-icon {
-    --sds-c-icon-color-foreground-default: #ffffff;
-    --sds-c-icon-color-foreground: #ffffff;
-    --lwc-colorTextIconDefault: #ffffff;
-    color: #ffffff;
+  --sds-c-icon-color-foreground-default: #ffffff;
+  --sds-c-icon-color-foreground: #ffffff;
+  --lwc-colorTextIconDefault: #ffffff;
+  color: #ffffff;
 }
 
 /* ── Create Quote Button ───────────── */
 .create-quote-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin: 0.75rem 0;
-    padding: 0.65rem 1rem;
-    background: var(--active-color);
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: background-color 0.15s ease, transform 0.1s ease;
-    text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  padding: 0.65rem 1rem;
+  background: var(--active-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
+  text-decoration: none;
 }
 
 .create-quote-btn:hover {
-    background-color: #1d4ed8;
-    transform: translateY(-1px);
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 .create-quote-btn:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 .create-quote-btn lightning-icon {
-    --sds-c-icon-color-foreground-default: #ffffff;
-    flex-shrink: 0;
+  --sds-c-icon-color-foreground-default: #ffffff;
+  flex-shrink: 0;
 }
 
 /* ── Content Area ──────────────────── */
 .content-area {
-    flex-grow: 1;
-    padding: 0;
-    background-color: var(--bg-main);
-    overflow-y: auto;
-    min-width: 0;
+  flex-grow: 1;
+  padding: 0;
+  background-color: var(--bg-main);
+  overflow-y: auto;
+  min-width: 0;
 }
 
 /* ── Placeholder for non‑built tabs ── */
 .placeholder-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    min-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 400px;
 }
 
 .placeholder-card {
-    background: #ffffff;
-    padding: 3rem 4rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
-    text-align: center;
-    border: 1px solid var(--border-color);
+  background: #ffffff;
+  padding: 3rem 4rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+  text-align: center;
+  border: 1px solid var(--border-color);
 }
 
 .placeholder-card h2 {
-    color: var(--text-dark);
+  color: var(--text-dark);
 }
 
 .placeholder-card p {
-    color: var(--text-color);
+  color: var(--text-color);
 }

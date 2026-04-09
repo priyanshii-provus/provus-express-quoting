@@ -1,127 +1,278 @@
 <template>
-    <div class="app-layout">
-        <!-- Left Sidebar Navigation -->
-        <nav class="sidebar">
-            <div class="sidebar-top">
-                <!-- Create Quote CTA -->
-                <button class="create-quote-btn" onclick={handleCreateQuote}>
-                    <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
-                    <span>Create Quote</span>
-                </button>
+  <div class="app-layout">
+    <!-- Left Sidebar Navigation -->
+    <nav class="sidebar">
+      <div class="sidebar-top">
+        <!-- Create Quote CTA -->
+        <button class="create-quote-btn" onclick={handleCreateQuote}>
+          <lightning-icon
+            icon-name="utility:add"
+            size="xx-small"
+            variant="inverse"
+          ></lightning-icon>
+          <span>Create Quote</span>
+        </button>
 
-                <a href="javascript:void(0);" class={dashboardClass} onclick={handleNavSelection} data-target="Dashboard">
-                    <lightning-icon icon-name="utility:apps" size="x-small" variant={dashboardVariant}></lightning-icon>
-                    <span>Dashboard</span>
-                </a>
-                <a href="javascript:void(0);" class={quotesClass} onclick={handleNavSelection} data-target="Quotes">
-                    <lightning-icon icon-name="utility:file" size="x-small" variant={quotesVariant}></lightning-icon>
-                    <span>Quotes</span>
-                </a>
-                <a href="javascript:void(0);" class={accountsClass} onclick={handleNavSelection} data-target="Accounts">
-                    <lightning-icon icon-name="utility:user" size="x-small" variant={accountsVariant}></lightning-icon>
-                    <span>Accounts</span>
-                </a>
-                <a href="javascript:void(0);" class={resourceRolesClass} onclick={handleNavSelection} data-target="Resource Roles">
-                    <lightning-icon icon-name="utility:groups" size="x-small" variant={resourceRolesVariant}></lightning-icon>
-                    <span>Resource Roles</span>
-                </a>
-                <a href="javascript:void(0);" class={productsClass} onclick={handleNavSelection} data-target="Products">
-                    <lightning-icon icon-name="utility:layers" size="x-small" variant={productsVariant}></lightning-icon>
-                    <span>Products</span>
-                </a>
-                <a href="javascript:void(0);" class={addonsClass} onclick={handleNavSelection} data-target="Add-ons">
-                    <lightning-icon icon-name="utility:puzzle" size="x-small" variant={addonsVariant}></lightning-icon>
-                    <span>Add-ons</span>
-                </a>
-                <a href="javascript:void(0);" class={aiAssistantClass} onclick={handleNavSelection} data-target="AI Assistant">
-                    <lightning-icon icon-name="utility:magicwand" size="x-small" variant={aiAssistantVariant}></lightning-icon>
-                    <span>AI Assistant</span>
-                </a>
+        <a
+          href="javascript:void(0);"
+          class={dashboardClass}
+          onclick={handleNavSelection}
+          data-target="Dashboard"
+        >
+          <lightning-icon
+            icon-name="utility:apps"
+            size="x-small"
+            variant={dashboardVariant}
+          ></lightning-icon>
+          <span>Dashboard</span>
+        </a>
+        <a
+          href="javascript:void(0);"
+          class={quotesClass}
+          onclick={handleNavSelection}
+          data-target="Quotes"
+        >
+          <lightning-icon
+            icon-name="utility:file"
+            size="x-small"
+            variant={quotesVariant}
+          ></lightning-icon>
+          <span>Quotes</span>
+        </a>
+        <a
+          href="javascript:void(0);"
+          class={accountsClass}
+          onclick={handleNavSelection}
+          data-target="Accounts"
+        >
+          <lightning-icon
+            icon-name="utility:user"
+            size="x-small"
+            variant={accountsVariant}
+          ></lightning-icon>
+          <span>Accounts</span>
+        </a>
+        <a
+          href="javascript:void(0);"
+          class={resourceRolesClass}
+          onclick={handleNavSelection}
+          data-target="Resource Roles"
+        >
+          <lightning-icon
+            icon-name="utility:groups"
+            size="x-small"
+            variant={resourceRolesVariant}
+          ></lightning-icon>
+          <span>Resource Roles</span>
+        </a>
+        <a
+          href="javascript:void(0);"
+          class={productsClass}
+          onclick={handleNavSelection}
+          data-target="Products"
+        >
+          <lightning-icon
+            icon-name="utility:layers"
+            size="x-small"
+            variant={productsVariant}
+          ></lightning-icon>
+          <span>Products</span>
+        </a>
+        <a
+          href="javascript:void(0);"
+          class={addonsClass}
+          onclick={handleNavSelection}
+          data-target="Add-ons"
+        >
+          <lightning-icon
+            icon-name="utility:puzzle"
+            size="x-small"
+            variant={addonsVariant}
+          ></lightning-icon>
+          <span>Add-ons</span>
+        </a>
+        <a
+          href="javascript:void(0);"
+          class={aiAssistantClass}
+          onclick={handleNavSelection}
+          data-target="AI Assistant"
+        >
+          <lightning-icon
+            icon-name="utility:magicwand"
+            size="x-small"
+            variant={aiAssistantVariant}
+          ></lightning-icon>
+          <span>AI Assistant</span>
+        </a>
+      </div>
+
+      <div class="sidebar-bottom">
+        <a
+          href="javascript:void(0);"
+          class="nav-item"
+          onclick={handleNavSelection}
+          data-target="Feedback"
+        >
+          <lightning-icon
+            icon-name="utility:emoji"
+            size="x-small"
+          ></lightning-icon>
+          <span>Feedback</span>
+        </a>
+        <a
+          href="javascript:void(0);"
+          class="nav-item"
+          onclick={handleNavSelection}
+          data-target="Take a Tour"
+        >
+          <lightning-icon
+            icon-name="utility:steps"
+            size="x-small"
+          ></lightning-icon>
+          <span>Take a Tour</span>
+        </a>
+        <template if:true={isAdmin}>
+          <a
+            href="javascript:void(0);"
+            class={settingsClass}
+            onclick={handleNavSelection}
+            data-target="Settings"
+          >
+            <lightning-icon
+              icon-name="utility:settings"
+              size="x-small"
+              variant={settingsVariant}
+            ></lightning-icon>
+            <span>Settings</span>
+          </a>
+        </template>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+      <template if:true={isDashboard}>
+        <c-dashboard-component></c-dashboard-component>
+      </template>
+      <template if:true={isQuotes}>
+        <c-quote-list-component
+          onnavigatetotab={handleNavigateToTab}
+          oncreatequote={handleCreateQuote}
+        ></c-quote-list-component>
+      </template>
+      <template if:true={isAccounts}>
+        <c-account-list-component
+          onnavigatetotab={handleNavigateToTab}
+        ></c-account-list-component>
+      </template>
+      <template if:true={isResourceRoles}>
+        <c-resource-roles-component
+          onnavigatetotab={handleNavigateToTab}
+        ></c-resource-roles-component>
+      </template>
+      <template if:true={isProducts}>
+        <c-products-component
+          onnavigatetotab={handleNavigateToTab}
+        ></c-products-component>
+      </template>
+      <template if:true={isAddons}>
+        <c-addons-component
+          onnavigatetotab={handleNavigateToTab}
+        ></c-addons-component>
+      </template>
+      <template if:true={isSettings}>
+        <c-settings-component
+          onnavigatetotab={handleNavigateToTab}
+        ></c-settings-component>
+      </template>
+
+      <!-- Placeholder for unbuilt tabs -->
+      <template if:true={isPlaceholder}>
+        <div class="placeholder-content">
+          <div class="placeholder-card">
+            <lightning-icon
+              icon-name="utility:setup"
+              size="large"
+            ></lightning-icon>
+            <h2 class="slds-m-top_medium slds-text-heading_medium">
+              {selectedTab}
+            </h2>
+            <p class="slds-m-top_small">This module is coming soon.</p>
+          </div>
+        </div>
+      </template>
+    </main>
+  </div>
+
+  <!-- Create Quote Modal -->
+  <template if:true={isCreateQuoteModalOpen}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      class="slds-modal slds-fade-in-open slds-modal_small"
+    >
+      <div class="slds-modal__container">
+        <header class="slds-modal__header">
+          <lightning-button-icon
+            icon-name="utility:close"
+            alternative-text="Close"
+            variant="bare"
+            class="slds-modal__close"
+            size="large"
+            onclick={closeCreateQuoteModal}
+          ></lightning-button-icon>
+          <h2 class="slds-modal__title slds-hyphenate">New Quote</h2>
+        </header>
+        <div class="slds-modal__content slds-p-around_medium">
+          <lightning-record-edit-form
+            object-api-name="Quote"
+            onsubmit={handleQuoteSubmit}
+            onsuccess={handleQuoteCreated}
+          >
+            <lightning-messages></lightning-messages>
+            <lightning-input-field field-name="Name"></lightning-input-field>
+            <lightning-combobox
+              label="Opportunity Name"
+              required
+              options={opportunityOptions}
+              value={selectedOpportunityId}
+              onchange={handleOpportunityChange}
+              class="slds-m-horizontal_xx-small slds-m-bottom_x-small"
+            ></lightning-combobox>
+            <lightning-combobox
+              label="Quote Time Period"
+              options={timePeriodOptions}
+              value={quoteTimePeriod}
+              onchange={handleTimePeriodChange}
+              class="slds-m-horizontal_xx-small slds-m-bottom_x-small"
+            ></lightning-combobox>
+            <lightning-input-field
+              field-name="Start_Date__c"
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="End_Date__c"
+            ></lightning-input-field>
+            <lightning-input-field
+              field-name="Description"
+            ></lightning-input-field>
+
+            <div class="slds-m-top_medium slds-text-align_right">
+              <lightning-button
+                variant="neutral"
+                label="Cancel"
+                onclick={closeCreateQuoteModal}
+              ></lightning-button>
+              <lightning-button
+                variant="brand"
+                type="submit"
+                label="Save"
+                class="slds-m-left_x-small"
+              ></lightning-button>
             </div>
-
-            <div class="sidebar-bottom">
-                <a href="javascript:void(0);" class="nav-item" onclick={handleNavSelection} data-target="Feedback">
-                    <lightning-icon icon-name="utility:emoji" size="x-small"></lightning-icon>
-                    <span>Feedback</span>
-                </a>
-                <a href="javascript:void(0);" class="nav-item" onclick={handleNavSelection} data-target="Take a Tour">
-                    <lightning-icon icon-name="utility:steps" size="x-small"></lightning-icon>
-                    <span>Take a Tour</span>
-                </a>
-                <template if:true={isAdmin}>
-                    <a href="javascript:void(0);" class={settingsClass} onclick={handleNavSelection} data-target="Settings">
-                        <lightning-icon icon-name="utility:settings" size="x-small" variant={settingsVariant}></lightning-icon>
-                        <span>Settings</span>
-                    </a>
-                </template>
-            </div>
-        </nav>
-
-        <!-- Main Content Area -->
-        <main class="content-area">
-            <template if:true={isDashboard}>
-                <c-dashboard-component></c-dashboard-component>
-            </template>
-            <template if:true={isQuotes}>
-                <c-quote-list-component></c-quote-list-component>
-            </template>
-            <template if:true={isAccounts}>
-                <c-account-list-component></c-account-list-component>
-            </template>
-            <template if:true={isResourceRoles}>
-                <c-resource-roles-component></c-resource-roles-component>
-            </template>
-            <template if:true={isProducts}>
-                <c-products-component></c-products-component>
-            </template>
-            <template if:true={isAddons}>
-                <c-addons-component></c-addons-component>
-            </template>
-            <template if:true={isSettings}>
-                <c-settings-component></c-settings-component>
-            </template>
-
-            <!-- Placeholder for unbuilt tabs -->
-            <template if:true={isPlaceholder}>
-                <div class="placeholder-content">
-                    <div class="placeholder-card">
-                        <lightning-icon icon-name="utility:setup" size="large"></lightning-icon>
-                        <h2 class="slds-m-top_medium slds-text-heading_medium">{selectedTab}</h2>
-                        <p class="slds-m-top_small">This module is coming soon.</p>
-                    </div>
-                </div>
-            </template>
-        </main>
-    </div>
-
-    <!-- Create Quote Modal -->
-    <template if:true={isCreateQuoteModalOpen}>
-        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small">
-            <div class="slds-modal__container">
-                <header class="slds-modal__header">
-                    <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeCreateQuoteModal}>
-                        <lightning-icon icon-name="utility:close" alternative-text="close" size="small"></lightning-icon>
-                    </button>
-                    <h2 class="slds-modal__title slds-hyphenate">New Quote</h2>
-                </header>
-                <div class="slds-modal__content slds-p-around_medium">
-                    <lightning-record-edit-form object-api-name="Quote" onsuccess={handleQuoteCreated}>
-                        <lightning-messages></lightning-messages>
-                        <lightning-input-field field-name="Name"></lightning-input-field>
-                        <lightning-input-field field-name="OpportunityId"></lightning-input-field>
-                        <lightning-input-field field-name="Quote_Time_Period__c"></lightning-input-field>
-                        <lightning-input-field field-name="Start_Date__c"></lightning-input-field>
-                        <lightning-input-field field-name="End_Date__c"></lightning-input-field>
-                        <lightning-input-field field-name="Description"></lightning-input-field>
-                        
-                        <div class="slds-m-top_medium slds-text-align_right">
-                            <lightning-button variant="neutral" label="Cancel" onclick={closeCreateQuoteModal}></lightning-button>
-                            <lightning-button variant="brand" type="submit" label="Save" class="slds-m-left_x-small"></lightning-button>
-                        </div>
-                    </lightning-record-edit-form>
-                </div>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
-    </template>
+          </lightning-record-edit-form>
+        </div>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
 </template>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Discount_Amount__c</fullName>
     <label>Discount Amount</label>
@@ -7,7 +7,8 @@
     <scale>2</scale>
     <required>false</required>
     <trackHistory>false</trackHistory>
-    <formula>Subtotal * (Discount / 100)</formula>
+    <formula>Line_Discount_Total__c</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-    <description>Calculated discount amount: Subtotal * (Discount / 100)</description>
+    <description
+  >Calculated discount amount: Sum of per-line discounts</description>
 </CustomField>

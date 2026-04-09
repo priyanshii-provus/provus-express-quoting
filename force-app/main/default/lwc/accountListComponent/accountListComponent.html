@@ -1,29 +1,69 @@
 <template>
-    <lightning-card title="Accounts" icon-name="standard:account">
-        <div class="slds-m-around_medium">
-            <!-- Filters -->
-            <div class="slds-grid slds-gutters slds-m-bottom_medium">
-                <div class="slds-col slds-size_1-of-3">
-                    <lightning-input type="search" placeholder="Search Accounts..." onchange={handleSearch}></lightning-input>
-                </div>
-                <div class="slds-col slds-size_1-of-3">
-                    <lightning-combobox name="industryFilter" label="Filter by Industry" value={industryFilter} options={industryOptions} onchange={handleFilterChange}></lightning-combobox>
-                </div>
-                <div class="slds-col slds-size_1-of-3 slds-text-align_right">
-                    <lightning-button label="New Account" variant="brand" onclick={handleNewAccount}></lightning-button>
-                </div>
-            </div>
+  <div class="accounts-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-info">
+        <h1>Accounts</h1>
+        <p>Manage and track your customer accounts and relationships</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-ai-assistant" onclick={handleAIAssistant}>
+          <lightning-icon
+            icon-name="utility:magicwand"
+            size="x-small"
+            variant="inverse"
+            class="slds-m-right_x-small"
+          ></lightning-icon>
+          AI Assistant
+        </button>
+      </div>
+    </div>
 
-            <!-- Datatable -->
-            <div style="height: 300px;">
-                <lightning-datatable
-                    key-field="Id"
-                    data={filteredAccounts}
-                    columns={columns}
-                    onrowaction={handleRowAction}
-                    hide-checkbox-column
-                ></lightning-datatable>
-            </div>
+    <!-- Main Content Card -->
+    <div class="premium-card">
+      <div class="card-title-row">
+        <h2>Account List</h2>
+        <lightning-button
+          label="New Account"
+          variant="brand"
+          onclick={handleNewAccount}
+          icon-name="utility:add"
+        ></lightning-button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <lightning-input
+            type="search"
+            placeholder="Search accounts by name or email..."
+            variant="label-hidden"
+            onchange={handleSearch}
+          ></lightning-input>
         </div>
-    </lightning-card>
+        <div class="combo-wrap">
+          <lightning-combobox
+            name="industryFilter"
+            placeholder="Filter by Industry"
+            value={industryFilter}
+            options={industryOptions}
+            variant="label-hidden"
+            onchange={handleFilterChange}
+          ></lightning-combobox>
+        </div>
+      </div>
+
+      <!-- Datatable -->
+      <div class="table-container">
+        <lightning-datatable
+          key-field="Id"
+          data={filteredAccounts}
+          columns={columns}
+          onrowaction={handleRowAction}
+          hide-checkbox-column
+          class="slds-m-top_medium"
+        ></lightning-datatable>
+      </div>
+    </div>
+  </div>
 </template>

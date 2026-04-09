@@ -12,3 +12,6 @@ package.xml
 **/__tests__/**
 
 node_modules/
+
+# Ignore App Menu to avoid deployment errors where target org app list does not precisely match
+force-app/main/default/appMenus/AppSwitcher.appMenu-meta.xml

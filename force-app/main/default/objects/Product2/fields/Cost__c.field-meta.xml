@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cost__c</fullName>
+    <label>Cost</label>
+    <type>Currency</type>
+    <precision>18</precision>
+    <scale>2</scale>
+    <required>false</required>
+    <description
+  >Standard cost for the product. Used in Quote margin calculations.</description>
+</CustomField>

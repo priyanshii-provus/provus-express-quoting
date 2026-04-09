@@ -1,285 +1,301 @@
-<apex:page controller="QuotePDFController" renderAs="pdf" applyBodyTag="false" applyHtmlTag="false" showHeader="false" standardStylesheets="false">
-<html>
-<head>
-    <style type="text/css">
+<apex:page
+  controller="QuotePDFController"
+  renderAs="pdf"
+  applyBodyTag="false"
+  applyHtmlTag="false"
+  showHeader="false"
+  standardStylesheets="false"
+>
+  <html>
+    <head>
+      <style type="text/css">
         @page {
-            size: A4;
-            margin: 20mm 15mm;
+          size: A4;
+          margin: 20mm 15mm;
         }
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
-            color: #1e293b;
-            line-height: 1.5;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 11px;
+          color: #1e293b;
+          line-height: 1.5;
         }
         .header {
-            border-bottom: 3px solid #0176d3;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+          border-bottom: 3px solid #0176d3;
+          padding-bottom: 15px;
+          margin-bottom: 20px;
         }
         .header h1 {
-            font-size: 24px;
-            color: #0176d3;
-            margin: 0 0 5px 0;
+          font-size: 24px;
+          color: #0176d3;
+          margin: 0 0 5px 0;
         }
         .header .quote-number {
-            font-size: 14px;
-            color: #475569;
+          font-size: 14px;
+          color: #475569;
         }
         .header .status-badge {
-            display: inline-block;
-            padding: 3px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            color: #ffffff;
-            background-color: #0176d3;
+          display: inline-block;
+          padding: 3px 12px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: bold;
+          color: #ffffff;
+          background-color: #0176d3;
         }
         .info-grid {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 25px;
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 25px;
         }
         .info-grid td {
-            padding: 8px 12px;
-            vertical-align: top;
-            width: 25%;
+          padding: 8px 12px;
+          vertical-align: top;
+          width: 25%;
         }
         .info-grid .label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #475569;
-            font-weight: bold;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #475569;
+          font-weight: bold;
         }
         .info-grid .value {
-            font-size: 13px;
-            color: #1e293b;
-            font-weight: 600;
-            margin-top: 3px;
+          font-size: 13px;
+          color: #1e293b;
+          font-weight: 600;
+          margin-top: 3px;
         }
         .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #0b5cab;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 8px;
-            margin: 25px 0 15px 0;
+          font-size: 16px;
+          font-weight: bold;
+          color: #0b5cab;
+          border-bottom: 2px solid #e5e7eb;
+          padding-bottom: 8px;
+          margin: 25px 0 15px 0;
         }
         .line-items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 20px;
         }
         .line-items-table th {
-            background-color: #f1f5f9;
-            color: #334155;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 10px 8px;
-            text-align: left;
-            border-bottom: 2px solid #cbd5e1;
+          background-color: #f1f5f9;
+          color: #334155;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          padding: 10px 8px;
+          text-align: left;
+          border-bottom: 2px solid #cbd5e1;
         }
         .line-items-table td {
-            padding: 8px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 11px;
+          padding: 8px;
+          border-bottom: 1px solid #e5e7eb;
+          font-size: 11px;
         }
         .line-items-table tr:nth-child(even) {
-            background-color: #f8fafc;
+          background-color: #f8fafc;
         }
         .line-items-table .number {
-            text-align: right;
+          text-align: right;
         }
         .totals-table {
-            width: 350px;
-            float: right;
-            border-collapse: collapse;
-            margin-top: 10px;
+          width: 350px;
+          float: right;
+          border-collapse: collapse;
+          margin-top: 10px;
         }
         .totals-table td {
-            padding: 8px 12px;
-            font-size: 12px;
+          padding: 8px 12px;
+          font-size: 12px;
         }
         .totals-table .total-label {
-            text-align: right;
-            color: #475569;
-            font-weight: 600;
+          text-align: right;
+          color: #475569;
+          font-weight: 600;
         }
         .totals-table .total-value {
-            text-align: right;
-            font-weight: 700;
-            color: #1e293b;
+          text-align: right;
+          font-weight: 700;
+          color: #1e293b;
         }
         .totals-table .grand-total td {
-            border-top: 2px solid #0176d3;
-            font-size: 14px;
-            color: #0176d3;
+          border-top: 2px solid #0176d3;
+          font-size: 14px;
+          color: #0176d3;
         }
         .footer {
-            clear: both;
-            margin-top: 40px;
-            padding-top: 15px;
-            border-top: 1px solid #e5e7eb;
-            font-size: 10px;
-            color: #94a3b8;
-            text-align: center;
+          clear: both;
+          margin-top: 40px;
+          padding-top: 15px;
+          border-top: 1px solid #e5e7eb;
+          font-size: 10px;
+          color: #94a3b8;
+          text-align: center;
         }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <div class="header">
+      </style>
+    </head>
+    <body>
+      <!-- Header -->
+      <div class="header">
         <h1>Provus Express Quote</h1>
         <div class="quote-number">
-            {!quote.QuoteNumber} — <span class="status-badge">{!quote.Status}</span>
+          {!quote.QuoteNumber} —
+          <span class="status-badge">{!quote.Status}</span>
         </div>
-    </div>
+      </div>
 
-    <!-- Quote Info -->
-    <table class="info-grid">
+      <!-- Quote Info -->
+      <table class="info-grid">
         <tr>
-            <td>
-                <div class="label">Quote Name</div>
-                <div class="value">{!quote.Name}</div>
-            </td>
-            <td>
-                <div class="label">Account</div>
-                <div class="value">{!quote.Opportunity.Account.Name}</div>
-            </td>
-            <td>
-                <div class="label">Opportunity</div>
-                <div class="value">{!quote.Opportunity.Name}</div>
-            </td>
-            <td>
-                <div class="label">Valid Until</div>
-                <div class="value">{!validUntilDisplay}</div>
-            </td>
+          <td>
+            <div class="label">Quote Name</div>
+            <div class="value">{!quote.Name}</div>
+          </td>
+          <td>
+            <div class="label">Account</div>
+            <div class="value">{!quote.Opportunity.Account.Name}</div>
+          </td>
+          <td>
+            <div class="label">Opportunity</div>
+            <div class="value">{!quote.Opportunity.Name}</div>
+          </td>
+          <td>
+            <div class="label">Valid Until</div>
+            <div class="value">{!validUntilDisplay}</div>
+          </td>
         </tr>
         <tr>
-            <td>
-                <div class="label">Created By</div>
-                <div class="value">{!quote.CreatedBy.Name}</div>
-            </td>
-            <td>
-                <div class="label">Created Date</div>
-                <div class="value">
-                    <apex:outputText value="{0, date, MMM dd, yyyy}">
-                        <apex:param value="{!quote.CreatedDate}" />
-                    </apex:outputText>
-                </div>
-            </td>
-            <td>
-                <div class="label">Time Period</div>
-                <div class="value">{!quote.Quote_Time_Period__c}</div>
-            </td>
-            <td>
-                <div class="label">Description</div>
-                <div class="value">{!IF(ISBLANK(quote.Description), '—', quote.Description)}</div>
-            </td>
+          <td>
+            <div class="label">Created By</div>
+            <div class="value">{!quote.CreatedBy.Name}</div>
+          </td>
+          <td>
+            <div class="label">Created Date</div>
+            <div class="value">
+              <apex:outputText value="{0, date, MMM dd, yyyy}">
+                <apex:param value="{!quote.CreatedDate}" />
+              </apex:outputText>
+            </div>
+          </td>
+          <td>
+            <div class="label">Time Period</div>
+            <div class="value">{!quote.Quote_Time_Period__c}</div>
+          </td>
+          <td>
+            <div class="label">Description</div>
+            <div class="value">
+              {!IF(ISBLANK(quote.Description), '—', quote.Description)}
+            </div>
+          </td>
         </tr>
-    </table>
+      </table>
 
-    <!-- Line Items -->
-    <div class="section-title">Line Items</div>
-    <table class="line-items-table">
+      <!-- Line Items -->
+      <div class="section-title">Line Items</div>
+      <table class="line-items-table">
         <thead>
-            <tr>
-                <th style="width: 5%">#</th>
-                <th style="width: 25%">Product / Resource</th>
-                <th style="width: 12%">Type</th>
-                <th class="number" style="width: 10%">Quantity</th>
-                <th class="number" style="width: 14%">Unit Price</th>
-                <th class="number" style="width: 12%">Discount</th>
-                <th class="number" style="width: 14%">Total Price</th>
-            </tr>
+          <tr>
+            <th style="width: 5%">#</th>
+            <th style="width: 25%">Product / Resource</th>
+            <th style="width: 12%">Type</th>
+            <th class="number" style="width: 10%">Quantity</th>
+            <th class="number" style="width: 14%">Unit Price</th>
+            <th class="number" style="width: 12%">Discount</th>
+            <th class="number" style="width: 14%">Total Price</th>
+          </tr>
         </thead>
         <tbody>
-            <apex:variable var="rowNum" value="{!1}" />
-            <apex:repeat value="{!lineItems}" var="item">
-                <tr>
-                    <td><apex:outputText value="{!FLOOR(rowNum)}" /></td>
-                    <td>
-                        <apex:outputText value="{!IF(item.Resource_Role__c != null, item.Resource_Role__r.Name, item.Product2.Name)}" />
-                    </td>
-                    <td>{!item.Item_Type__c}</td>
-                    <td class="number">
-                        <apex:outputText value="{0, number, #,##0}">
-                            <apex:param value="{!item.Quantity}" />
-                        </apex:outputText>
-                    </td>
-                    <td class="number">
-                        <apex:outputText value="{0, number, $#,##0.00}">
-                            <apex:param value="{!item.UnitPrice}" />
-                        </apex:outputText>
-                    </td>
-                    <td class="number">
-                        <apex:outputText value="{0, number, #,##0}%">
-                            <apex:param value="{!IF(ISBLANK(item.Discount), 0, item.Discount)}" />
-                        </apex:outputText>
-                    </td>
-                    <td class="number">
-                        <apex:outputText value="{0, number, $#,##0.00}">
-                            <apex:param value="{!item.TotalPrice}" />
-                        </apex:outputText>
-                    </td>
-                </tr>
-                <apex:variable var="rowNum" value="{!rowNum + 1}" />
-            </apex:repeat>
+          <apex:variable var="rowNum" value="{!1}" />
+          <apex:repeat value="{!lineItems}" var="item">
+            <tr>
+              <td><apex:outputText value="{!FLOOR(rowNum)}" /></td>
+              <td>
+                <apex:outputText
+                  value="{!IF(item.Resource_Role__c != null, item.Resource_Role__r.Name, item.Product2.Name)}"
+                />
+              </td>
+              <td>{!item.Item_Type__c}</td>
+              <td class="number">
+                <apex:outputText value="{0, number, #,##0}">
+                  <apex:param value="{!item.Quantity}" />
+                </apex:outputText>
+              </td>
+              <td class="number">
+                <apex:outputText value="{0, number, $#,##0.00}">
+                  <apex:param value="{!item.UnitPrice}" />
+                </apex:outputText>
+              </td>
+              <td class="number">
+                <apex:outputText value="{0, number, #,##0}%">
+                  <apex:param
+                    value="{!IF(ISBLANK(item.Discount), 0, item.Discount)}"
+                  />
+                </apex:outputText>
+              </td>
+              <td class="number">
+                <apex:outputText value="{0, number, $#,##0.00}">
+                  <apex:param value="{!item.TotalPrice}" />
+                </apex:outputText>
+              </td>
+            </tr>
+            <apex:variable var="rowNum" value="{!rowNum + 1}" />
+          </apex:repeat>
         </tbody>
-    </table>
+      </table>
 
-    <!-- Totals -->
-    <table class="totals-table">
+      <!-- Totals -->
+      <table class="totals-table">
         <tr>
-            <td class="total-label">Subtotal</td>
-            <td class="total-value">
-                <apex:outputText value="{0, number, $#,##0.00}">
-                    <apex:param value="{!computedSubtotal}" />
-                </apex:outputText>
-            </td>
+          <td class="total-label">Subtotal</td>
+          <td class="total-value">
+            <apex:outputText value="{0, number, $#,##0.00}">
+              <apex:param value="{!computedSubtotal}" />
+            </apex:outputText>
+          </td>
         </tr>
         <tr>
-            <td class="total-label">Discount</td>
-            <td class="total-value">
-                <apex:outputText value="{0, number, $#,##0.00}">
-                    <apex:param value="{!computedDiscount}" />
-                </apex:outputText>
-            </td>
+          <td class="total-label">Discount</td>
+          <td class="total-value">
+            <apex:outputText value="{0, number, $#,##0.00}">
+              <apex:param value="{!computedDiscount}" />
+            </apex:outputText>
+          </td>
         </tr>
         <tr>
-            <td class="total-label">Total Cost</td>
-            <td class="total-value">
-                <apex:outputText value="{0, number, $#,##0.00}">
-                    <apex:param value="{!computedTotalCost}" />
-                </apex:outputText>
-            </td>
+          <td class="total-label">Total Cost</td>
+          <td class="total-value">
+            <apex:outputText value="{0, number, $#,##0.00}">
+              <apex:param value="{!computedTotalCost}" />
+            </apex:outputText>
+          </td>
         </tr>
         <tr>
-            <td class="total-label">Margin</td>
-            <td class="total-value">
-                <apex:outputText value="{0, number, #,##0.00}%">
-                    <apex:param value="{!computedMargin}" />
-                </apex:outputText>
-            </td>
+          <td class="total-label">Margin</td>
+          <td class="total-value">
+            <apex:outputText value="{0, number, #,##0.00}%">
+              <apex:param value="{!computedMargin}" />
+            </apex:outputText>
+          </td>
         </tr>
         <tr class="grand-total">
-            <td class="total-label">Total Revenue</td>
-            <td class="total-value">
-                <apex:outputText value="{0, number, $#,##0.00}">
-                    <apex:param value="{!computedTotalRevenue}" />
-                </apex:outputText>
-            </td>
+          <td class="total-label">Total Revenue</td>
+          <td class="total-value">
+            <apex:outputText value="{0, number, $#,##0.00}">
+              <apex:param value="{!computedTotalRevenue}" />
+            </apex:outputText>
+          </td>
         </tr>
-    </table>
+      </table>
 
-    <!-- Footer -->
-    <div class="footer">
-        Generated on <apex:outputText value="{0, date, MMMM dd, yyyy 'at' hh:mm a}">
-            <apex:param value="{!NOW()}" />
-        </apex:outputText> — Provus Express Quoting
-    </div>
-</body>
-</html>
+      <!-- Footer -->
+      <div class="footer">
+        Generated on
+        <apex:outputText value="{0, date, MMMM dd, yyyy 'at' hh:mm a}">
+          <apex:param value="{!NOW()}" />
+        </apex:outputText>
+        — Provus Express Quoting
+      </div>
+    </body>
+  </html>
 </apex:page>

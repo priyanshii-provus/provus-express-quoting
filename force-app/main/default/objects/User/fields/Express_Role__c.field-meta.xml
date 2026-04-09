@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Express_Role__c</fullName>
-    <description>Role assigned to user in Provus Express Quoting app.</description>
+    <description
+  >Role assigned to user in Provus Express Quoting app.</description>
     <externalId>false</externalId>
     <label>Express Role</label>
     <required>false</required>
