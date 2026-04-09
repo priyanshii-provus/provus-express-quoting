@@ -1,10 +1,7 @@
 {
   "orgName": "Provus Express Quoting",
-  "edition": "developer",
-  "features": [
-    "Communities",
-    "ServiceCloud"
-  ],
+  "edition": "enterprise",
+  "features": ["Communities", "ServiceCloud"],
   "settings": {
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true

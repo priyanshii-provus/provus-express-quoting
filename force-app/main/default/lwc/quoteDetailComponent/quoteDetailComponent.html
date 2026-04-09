@@ -1,511 +1,773 @@
 <template>
-    <div class="quote-detail-wrapper">
-
-        <!-- ─── Breadcrumb Header ─── -->
-        <div class="breadcrumb-header">
-            <div class="breadcrumb-left">
-                <button class="back-btn" onclick={handleBackToQuotes}>
-                    <lightning-icon icon-name="utility:chevronleft" size="xx-small"></lightning-icon>
-                </button>
-                <span class="breadcrumb-text">Quotes</span>
-                <span class="breadcrumb-sep">›</span>
-                <span class="breadcrumb-current">{quote.QuoteNumber}</span>
-                <span class={statusBadgeClass}>{quote.Status}</span>
-            </div>
-            <div class="header-actions">
-                <template if:true={isDraft}>
-                    <lightning-button label="Submit for Approval" onclick={openSubmitModal}></lightning-button>
-                </template>
-                <template if:true={isPendingApproval}>
-                    <lightning-button label="Recall" onclick={handleRecall}></lightning-button>
-                    <lightning-button variant="success" label="Approve" onclick={openApproveModal} class="success-btn"></lightning-button>
-                    <lightning-button variant="destructive" label="Reject" onclick={openRejectModal}></lightning-button>
-                </template>
-                <lightning-button variant="brand" label="Generate PDF" icon-name="utility:download"
-                    onclick={handleGeneratePDF} disabled={isGenerating}></lightning-button>
-                <lightning-button variant="brand" label="Save" onclick={handleSave}></lightning-button>
-                <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh"
-                    onclick={handleRefresh} variant="border-filled"></lightning-button-icon>
-            </div>
-        </div>
-
-        <!-- ─── Description ─── -->
-        <div class="description-row">
-            <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
-            <span class="description-text">
-                <template if:true={quote.Description}>{quote.Description}</template>
-                <template if:false={quote.Description}>Click to edit description</template>
-            </span>
-        </div>
-
-        <!-- ─── Financial Summary Strip ─── -->
-        <div class="financial-strip">
-            <div class="strip-item">
-                <span class="strip-label">Total amount</span>
-                <span class="strip-value bold">
-                    <lightning-formatted-number value={quote.TotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                </span>
-            </div>
-            <div class="strip-item">
-                <span class="strip-label">Subtotal</span>
-                <span class="strip-value">
-                    <lightning-formatted-number value={quote.Subtotal} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                </span>
-            </div>
-            <div class="strip-item">
-                <span class="strip-label">Margin</span>
-                <span class="strip-value">{formattedMargin}</span>
-            </div>
-            <div class="strip-item">
-                <span class="strip-label">Discount</span>
-                <span class="strip-value">{formattedDiscount}</span>
-            </div>
-            <div class="strip-item">
-                <span class="strip-label">Quote time period</span>
-                <span class="strip-value">{quote.TimePeriod}</span>
-            </div>
-            <div class="strip-item">
-                <span class="strip-label">Start date</span>
-                <span class="strip-value">{formattedStartDate}</span>
-            </div>
-            <div class="strip-item">
-                <span class="strip-label">End date</span>
-                <span class="strip-value">{formattedEndDate}</span>
-            </div>
-        </div>
-
-        <!-- ─── Tab Navigation ─── -->
-        <div class="tab-nav">
-            <button class={summaryTabClass} data-id="summary" onclick={handleTabClick}>Summary</button>
-            <button class={lineItemsTabClass} data-id="line-items" onclick={handleTabClick}>Line Items</button>
-            <button class={timelineTabClass} data-id="timeline" onclick={handleTabClick}>Timeline</button>
-            <button class={generatedPDFsTabClass} data-id="generated-pdfs" onclick={handleTabClick}>Generated PDFs</button>
-        </div>
-
-        <!-- ─── Tab Content ─── -->
-        <div class="tab-content">
-
-            <!-- SUMMARY TAB -->
-            <template if:true={isSummaryActive}>
-                <!-- Quote Info Grid -->
-                <div class="info-card">
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Opportunity</span>
-                            <span class="info-value">{quote.OpportunityName}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Account</span>
-                            <span class="info-value">{quote.AccountName}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Valid Until</span>
-                            <span class="info-value">{quote.ValidUntil}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Quote Time Period</span>
-                            <span class="info-value">{quote.TimePeriod}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Created Date</span>
-                            <span class="info-value">{formattedCreatedDate}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Created By</span>
-                            <span class="info-value">{quote.CreatedByName}</span>
-                        </div>
-                    </div>
-                    <div class="info-row-bottom">
-                        <span class="info-label">Last Modified By</span>
-                        <span class="info-value">{quote.LastModifiedByName}</span>
-                    </div>
-                </div>
-
-                <!-- Revenue Cards Row -->
-                <div class="revenue-grid">
-                    <!-- Labor Revenue -->
-                    <div class="revenue-card">
-                        <div class="revenue-header">
-                            <div class="revenue-title">
-                                <lightning-icon icon-name="standard:resource_absence" size="x-small"></lightning-icon>
-                                <span>Labor Revenue</span>
-                            </div>
-                            <span class="margin-badge margin-positive">↗ {laborMarginPct}%</span>
-                        </div>
-                        <div class="revenue-amount">
-                            <lightning-formatted-number value={quote.LaborRevenue} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                        </div>
-                        <div class="revenue-details">
-                            Cost: <lightning-formatted-number value={laborCost} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                            &bull; Margin: <lightning-formatted-number value={laborMargin} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                        </div>
-                        <div class="revenue-count">{laborCount} Resource Roles</div>
-                    </div>
-
-                    <!-- Products Revenue -->
-                    <div class="revenue-card">
-                        <div class="revenue-header">
-                            <div class="revenue-title">
-                                <lightning-icon icon-name="standard:product_item" size="x-small"></lightning-icon>
-                                <span>Products Revenue</span>
-                            </div>
-                            <span class="margin-badge margin-negative">↘ {productsMarginPct}%</span>
-                        </div>
-                        <div class="revenue-amount">
-                            <lightning-formatted-number value={quote.ProductsRevenue} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                        </div>
-                        <div class="revenue-details">
-                            Cost: <lightning-formatted-number value={productsCost} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                            &bull; Margin: <lightning-formatted-number value={productsMargin} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                        </div>
-                        <div class="revenue-count">{productsCount} Products</div>
-                    </div>
-
-                    <!-- Add-ons Revenue -->
-                    <div class="revenue-card">
-                        <div class="revenue-header">
-                            <div class="revenue-title">
-                                <lightning-icon icon-name="standard:service_contract" size="x-small"></lightning-icon>
-                                <span>Add-ons Revenue</span>
-                            </div>
-                            <span class="margin-badge margin-positive">↗ {addonsMarginPct}%</span>
-                        </div>
-                        <div class="revenue-amount">
-                            <lightning-formatted-number value={quote.AddonsRevenue} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                        </div>
-                        <div class="revenue-details">
-                            Cost: <lightning-formatted-number value={addonsCost} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                            &bull; Margin: <lightning-formatted-number value={addonsMargin} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                        </div>
-                        <div class="revenue-count">{addonsCount} Add-on Items</div>
-                    </div>
-
-                    <!-- Approval History -->
-                    <div class="revenue-card approval-card">
-                        <div class="approval-header-row">
-                            <h3 class="approval-title">Approval History</h3>
-                            <lightning-button-icon icon-name="utility:refresh" size="xx-small" variant="bare" onclick={loadApprovalHistory}></lightning-button-icon>
-                        </div>
-                        <p class="approval-desc">Track the approval process for this quote.</p>
-                        
-                        <template if:true={hasApprovalHistory}>
-                            <div class="approval-history-list">
-                                <template for:each={approvalHistory} for:item="step">
-                                    <div key={step.id} class="approval-step">
-                                        <div class="step-marker">
-                                            <div class={step.markerClass}></div>
-                                            <div class="step-line"></div>
-                                        </div>
-                                        <div class="step-content">
-                                            <div class="step-header">
-                                                <span class="step-actor">{step.actorName}</span>
-                                                <span class="step-status-label">{step.statusLabel}</span>
-                                            </div>
-                                            <template if:true={step.comments}>
-                                                <div class="step-comment">"{step.comments}"</div>
-                                            </template>
-                                            <div class="step-date">{step.formattedDate}</div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                        <template if:false={hasApprovalHistory}>
-                            <div class="approval-placeholder">
-                                <lightning-icon icon-name="utility:page" size="large"></lightning-icon>
-                                <p>No approval history yet.</p>
-                                <p class="approval-sub">Submit this quote for approval to see the approval process.</p>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Charts Row -->
-                <div class="charts-grid">
-                    <!-- Item Type Breakdown -->
-                    <div class="chart-card">
-                        <h3 class="chart-title">Item Type Breakdown</h3>
-                        <p class="chart-subtitle">Cost and margin distribution by item type</p>
-                        <div class="bar-chart">
-                            <div class="bar-group">
-                                <div class="bar-container">
-                                    <div class="bar bar-cost" style={laborCostBarPct}></div>
-                                    <div class="bar bar-margin" style={laborMarginBarPct}></div>
-                                </div>
-                                <span class="bar-label">Labor</span>
-                            </div>
-                            <div class="bar-group">
-                                <div class="bar-container">
-                                    <div class="bar bar-cost" style={productsCostBarPct}></div>
-                                    <div class="bar bar-margin" style={productsMarginBarPct}></div>
-                                </div>
-                                <span class="bar-label">Products</span>
-                            </div>
-                            <div class="bar-group">
-                                <div class="bar-container">
-                                    <div class="bar bar-cost" style={addonsCostBarPct}></div>
-                                    <div class="bar bar-margin" style={addonsMarginBarPct}></div>
-                                </div>
-                                <span class="bar-label">Add-ons</span>
-                            </div>
-                        </div>
-                        <div class="chart-legend">
-                            <span class="legend-item"><span class="legend-dot cost-dot"></span> Cost</span>
-                            <span class="legend-item"><span class="legend-dot margin-dot"></span> Margin</span>
-                        </div>
-                    </div>
-
-                    <!-- Phase Breakdown -->
-                    <div class="chart-card">
-                        <h3 class="chart-title">Phase Breakdown</h3>
-                        <p class="chart-subtitle">Cost and margin distribution by project phase</p>
-                        <div class="bar-chart">
-                            <template for:each={phaseChartData} for:item="p">
-                                <div class="bar-group" key={p.phase}>
-                                    <div class="bar-container">
-                                        <div class="bar bar-cost" style={p.costBarPct}></div>
-                                        <div class="bar bar-margin" style={p.marginBarPct}></div>
-                                    </div>
-                                    <span class="bar-label">{p.phase}</span>
-                                </div>
-                            </template>
-                        </div>
-                        <div class="chart-legend">
-                            <span class="legend-item"><span class="legend-dot cost-dot"></span> Cost</span>
-                            <span class="legend-item"><span class="legend-dot margin-dot"></span> Margin</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Phase Summary Table -->
-                <template if:true={hasPhaseData}>
-                    <div class="phase-table-card">
-                        <table class="phase-table">
-                            <thead>
-                                <tr>
-                                    <th>Phase</th>
-                                    <th>Labor</th>
-                                    <th>Products</th>
-                                    <th>Add-ons</th>
-                                    <th>Total</th>
-                                    <th>Items</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <template for:each={phaseData} for:item="row">
-                                    <tr key={row.phase}>
-                                        <td>{row.phase}</td>
-                                        <td class="amount-labor">
-                                            <lightning-formatted-number value={row.labor} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                                        </td>
-                                        <td class="amount-product">
-                                            <lightning-formatted-number value={row.products} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                                        </td>
-                                        <td class="amount-addon">
-                                            <lightning-formatted-number value={row.addons} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                                        </td>
-                                        <td>
-                                            <lightning-formatted-number value={row.total} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                                        </td>
-                                        <td>{row.items}</td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
-                </template>
-            </template>
-
-            <!-- LINE ITEMS TAB -->
-            <template if:true={isLineItemsActive}>
-                <c-quote-line-items-component record-id={recordId}></c-quote-line-items-component>
-            </template>
-
-            <!-- TIMELINE TAB -->
-            <template if:true={isTimelineActive}>
-                <template if:true={hasTimeline}>
-                    <div class="gantt-container">
-                        <!-- Toolbar -->
-                        <div class="gantt-toolbar">
-                            <div class="gantt-legend">
-                                <span class="legend-item"><span class="legend-dot dot-product"></span> Product</span>
-                                <span class="legend-item"><span class="legend-dot dot-addon"></span> Add-on</span>
-                                <span class="legend-item"><span class="legend-dot dot-resource"></span> Resource Role</span>
-                            </div>
-                            <div class="gantt-actions">
-                                <lightning-button variant="brand" label="+ Add Milestone" onclick={handleAddMilestone}></lightning-button>
-                            </div>
-                        </div>
-                        
-                        <!-- Chart Area -->
-                        <div class="gantt-chart">
-                            <!-- Header Layer -->
-                            <div class="gantt-header-wrapper">
-                                <div class="gantt-left-pane gantt-header-pane">
-                                    <div class="col-issues">Issues</div>
-                                    <div class="col-duration">Duration</div>
-                                </div>
-                                <div class="gantt-right-pane gantt-header-pane">
-                                    <div class="gantt-years" style={ganttGridStyle}>
-                                        <template for:each={ganttYears} for:item="yr">
-                                            <div key={yr.key} class="year-cell" style={yr.style}>{yr.year}</div>
-                                        </template>
-                                    </div>
-                                    <div class="gantt-months" style={ganttGridStyle}>
-                                        <template for:each={ganttMonths} for:item="m">
-                                            <div key={m.key} class="month-cell">{m.label}</div>
-                                        </template>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Body Layer -->
-                            <div class="gantt-body">
-                                <template for:each={ganttPhases} for:item="phase">
-                                    <!-- Phase Header Row -->
-                                    <div key={phase.phaseName} class="gantt-phase-row">
-                                        <div class="gantt-left-pane">
-                                            <div class="phase-name">{phase.phaseName}</div>
-                                        </div>
-                                        <div class="gantt-right-pane gantt-phase-bg" style={ganttGridStyle}>
-                                            <!-- Optionally put lines here, or leave empty if background lines are enough -->
-                                            <template for:each={ganttMonths} for:item="m">
-                                                <div key={m.key} class="grid-line"></div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Phase Items -->
-                                    <template for:each={phase.items} for:item="item">
-                                        <div key={item.id} class="gantt-item-row">
-                                            <div class="gantt-left-pane">
-                                                <div class="col-issues">
-                                                    <span class={item.dotClass}></span>
-                                                    <span class="item-name">{item.name}</span>
-                                                </div>
-                                                <div class="col-duration">{item.duration}</div>
-                                            </div>
-                                            <div class="gantt-right-pane item-bg">
-                                                <!-- Background Grid Lines -->
-                                                <div class="bg-lines" style={ganttGridStyle}>
-                                                    <template for:each={ganttMonths} for:item="m">
-                                                        <div key={m.key} class="grid-line"></div>
-                                                    </template>
-                                                </div>
-                                                <!-- Pill Wrapper (for positioning layout on CSS grid) -->
-                                                <div class="pill-wrapper" style={ganttGridStyle}>
-                                                    <div class={item.pillClass} style={item.pillStyle}>
-                                                        <lightning-icon icon-name={item.iconName} size="xx-small" class="pill-icon"></lightning-icon>
-                                                        <span class="pill-label">{item.name}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-                <template if:false={hasTimeline}>
-                    <div class="placeholder-tab">
-                        <lightning-icon icon-name="utility:clock" size="large"></lightning-icon>
-                        <h2>No Timeline Available</h2>
-                        <p>Set a Start Date and End Date on this quote to generate the timeline.</p>
-                    </div>
-                </template>
-            </template>
-
-            <!-- GENERATED PDFs TAB -->
-            <template if:true={isGeneratedPDFsActive}>
-                <div class="pdf-versions-section">
-                    <h3 class="section-title">PDF Versions</h3>
-                    <template if:true={hasPDFVersions}>
-                        <table class="pdf-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Version</th>
-                                    <th>Notes</th>
-                                    <th>Total</th>
-                                    <th>Margin</th>
-                                    <th>Created</th>
-                                    <th>Created By</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <template for:each={pdfVersions} for:item="version" for:index="index">
-                                    <tr key={version.id}>
-                                        <td>{version.rowNumber}</td>
-                                        <td>
-                                            <span class="version-badge">v{version.versionNumber}</span>
-                                            <template if:true={version.isLatest}>
-                                                <span class="latest-badge">Latest</span>
-                                            </template>
-                                        </td>
-                                        <td class="notes-cell">{version.notesDisplay}</td>
-                                        <td>
-                                            <lightning-formatted-number value={version.totalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number>
-                                        </td>
-                                        <td>
-                                            <span class="margin-value-text">
-                                                <lightning-formatted-number value={version.marginDecimal} format-style="percent" maximum-fraction-digits="2"></lightning-formatted-number>
-                                            </span>
-                                        </td>
-                                        <td>{version.formattedDate}</td>
-                                        <td>{version.createdByName}</td>
-                                        <td class="actions-cell">
-                                            <lightning-button-icon icon-name="utility:preview" alternative-text="View"
-                                                data-id={version.contentDocumentId} onclick={handleViewVersion} variant="bare" size="small"></lightning-button-icon>
-                                            <lightning-button-icon icon-name="utility:download" alternative-text="Download"
-                                                data-id={version.contentVersionId} onclick={handleDownloadVersion} variant="bare" size="small"></lightning-button-icon>
-                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
-                                                data-id={version.id} onclick={handleDeleteVersion} variant="bare" size="small" class="delete-icon"></lightning-button-icon>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </template>
-                    <template if:false={hasPDFVersions}>
-                        <div class="placeholder-tab">
-                            <lightning-icon icon-name="utility:pdf_ext" size="large"></lightning-icon>
-                            <p>No PDF versions generated yet.</p>
-                            <p class="sub-text">Click "Generate PDF" to create your first version.</p>
-                        </div>
-                    </template>
-                </div>
-            </template>
-        </div>
-        <!-- ─── Approval Modal ─── -->
-        <template if:true={showApprovalModal}>
-            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header">
-                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
-                            <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
-                            <span class="slds-assistive-text">Close</span>
-                        </button>
-                        <h2 class="slds-text-heading_medium slds-hyphenate">{modalTitle}</h2>
-                    </header>
-                    <div class="slds-modal__content slds-p-around_medium">
-                        <p class="slds-m-bottom_small">{modalDescription}</p>
-                        <lightning-textarea 
-                            label="Comments" 
-                            value={approvalComment} 
-                            onchange={handleCommentChange}
-                            placeholder="Add your comments here..."
-                            required={isRejectAction}>
-                        </lightning-textarea>
-                    </div>
-                    <footer class="slds-modal__footer">
-                        <lightning-button label="Cancel" onclick={closeModal} class="slds-m-right_x-small"></lightning-button>
-                        <lightning-button variant="brand" label={modalButtonLabel} onclick={handleApprovalAction} disabled={isApprovalSubmitting}></lightning-button>
-                    </footer>
-                </div>
-            </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
+  <div class="quote-detail-wrapper">
+    <!-- ─── Breadcrumb Header ─── -->
+    <div class="breadcrumb-header">
+      <div class="breadcrumb-left">
+        <button class="back-btn" onclick={handleBackToQuotes}>
+          <lightning-icon
+            icon-name="utility:chevronleft"
+            size="xx-small"
+          ></lightning-icon>
+        </button>
+        <span class="breadcrumb-text">Quotes</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">{quote.QuoteNumber}</span>
+        <span class={statusBadgeClass}>{quote.Status}</span>
+        <span
+          class="slds-badge slds-m-left_small"
+          style="background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb"
+          >Role: {currentUserRole}</span
+        >
+      </div>
+      <div class="header-actions">
+        <template if:true={isDraft}>
+          <lightning-button
+            label="Submit for Approval"
+            onclick={openSubmitModal}
+          ></lightning-button>
         </template>
+        <template if:true={canRecall}>
+          <lightning-button
+            label="Recall"
+            onclick={handleRecall}
+          ></lightning-button>
+        </template>
+        <template if:true={canApproveReject}>
+          <lightning-button
+            variant="success"
+            label="Approve"
+            onclick={openApproveModal}
+            class="success-btn"
+          ></lightning-button>
+          <lightning-button
+            variant="destructive"
+            label="Reject"
+            onclick={openRejectModal}
+          ></lightning-button>
+        </template>
+        <lightning-button
+          variant="brand"
+          label="Generate PDF"
+          icon-name="utility:download"
+          onclick={handleGeneratePDF}
+          disabled={isGenerating}
+        ></lightning-button>
+        <lightning-button
+          variant="brand"
+          label="Save"
+          onclick={handleSave}
+        ></lightning-button>
+        <lightning-button-icon
+          icon-name="utility:refresh"
+          alternative-text="Refresh"
+          onclick={handleRefresh}
+          variant="border-filled"
+        ></lightning-button-icon>
+      </div>
     </div>
+
+    <!-- ─── Description ─── -->
+    <div class="description-row">
+      <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+      <span class="description-text">
+        <template if:true={quote.Description}>{quote.Description}</template>
+        <template if:false={quote.Description}
+          >Click to edit description</template
+        >
+      </span>
+    </div>
+
+    <!-- ─── Financial Summary Strip ─── -->
+    <div class="financial-strip">
+      <div class="strip-item">
+        <span class="strip-label">Total amount</span>
+        <span class="strip-value bold">
+          <lightning-formatted-number
+            value={quote.TotalPrice}
+            format-style="currency"
+            currency-code="USD"
+          ></lightning-formatted-number>
+        </span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Subtotal</span>
+        <span class="strip-value">
+          <lightning-formatted-number
+            value={quote.Subtotal}
+            format-style="currency"
+            currency-code="USD"
+          ></lightning-formatted-number>
+        </span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Margin</span>
+        <span class="strip-value">{formattedMargin}</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Discount</span>
+        <span class="strip-value">{formattedDiscount}</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Quote time period</span>
+        <span class="strip-value">{quote.TimePeriod}</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Start date</span>
+        <span class="strip-value">{formattedStartDate}</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">End date</span>
+        <span class="strip-value">{formattedEndDate}</span>
+      </div>
+    </div>
+
+    <!-- ─── Tab Navigation ─── -->
+    <div class="tab-nav">
+      <button
+        class={summaryTabClass}
+        data-id="summary"
+        onclick={handleTabClick}
+      >
+        Summary
+      </button>
+      <button
+        class={lineItemsTabClass}
+        data-id="line-items"
+        onclick={handleTabClick}
+      >
+        Line Items
+      </button>
+      <button
+        class={timelineTabClass}
+        data-id="timeline"
+        onclick={handleTabClick}
+      >
+        Timeline
+      </button>
+      <button
+        class={generatedPDFsTabClass}
+        data-id="generated-pdfs"
+        onclick={handleTabClick}
+      >
+        Generated PDFs
+      </button>
+    </div>
+
+    <!-- ─── Tab Content ─── -->
+    <div class="tab-content">
+      <!-- SUMMARY TAB -->
+      <template if:true={isSummaryActive}>
+        <!-- Quote Info Grid -->
+        <div class="info-card">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Opportunity</span>
+              <span class="info-value">{quote.OpportunityName}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Account</span>
+              <span class="info-value">{quote.AccountName}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Valid Until</span>
+              <span class="info-value">{quote.ValidUntil}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Quote Time Period</span>
+              <span class="info-value">{quote.TimePeriod}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Created Date</span>
+              <span class="info-value">{formattedCreatedDate}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Created By</span>
+              <span class="info-value">{quote.CreatedByName}</span>
+            </div>
+          </div>
+          <div class="info-row-bottom">
+            <span class="info-label">Last Modified By</span>
+            <span class="info-value">{quote.LastModifiedByName}</span>
+          </div>
+        </div>
+
+        <!-- Revenue Cards Row -->
+        <div class="revenue-grid">
+          <!-- Labor Revenue -->
+          <div class="revenue-card">
+            <div class="revenue-header">
+              <div class="revenue-title">
+                <lightning-icon
+                  icon-name="standard:resource_absence"
+                  size="x-small"
+                ></lightning-icon>
+                <span>Labor Revenue</span>
+              </div>
+              <span class="margin-badge margin-positive"
+                >↗ {laborMarginPct}%</span
+              >
+            </div>
+            <div class="revenue-amount">
+              <lightning-formatted-number
+                value={quote.LaborRevenue}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+            </div>
+            <div class="revenue-details">
+              Cost:
+              <lightning-formatted-number
+                value={laborCost}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+              &bull; Margin:
+              <lightning-formatted-number
+                value={laborMargin}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+            </div>
+            <div class="revenue-count">{laborCount} Resource Roles</div>
+          </div>
+
+          <!-- Products Revenue -->
+          <div class="revenue-card">
+            <div class="revenue-header">
+              <div class="revenue-title">
+                <lightning-icon
+                  icon-name="standard:product_item"
+                  size="x-small"
+                ></lightning-icon>
+                <span>Products Revenue</span>
+              </div>
+              <span class="margin-badge margin-negative"
+                >↘ {productsMarginPct}%</span
+              >
+            </div>
+            <div class="revenue-amount">
+              <lightning-formatted-number
+                value={quote.ProductsRevenue}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+            </div>
+            <div class="revenue-details">
+              Cost:
+              <lightning-formatted-number
+                value={productsCost}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+              &bull; Margin:
+              <lightning-formatted-number
+                value={productsMargin}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+            </div>
+            <div class="revenue-count">{productsCount} Products</div>
+          </div>
+
+          <!-- Add-ons Revenue -->
+          <div class="revenue-card">
+            <div class="revenue-header">
+              <div class="revenue-title">
+                <lightning-icon
+                  icon-name="standard:service_contract"
+                  size="x-small"
+                ></lightning-icon>
+                <span>Add-ons Revenue</span>
+              </div>
+              <span class="margin-badge margin-positive"
+                >↗ {addonsMarginPct}%</span
+              >
+            </div>
+            <div class="revenue-amount">
+              <lightning-formatted-number
+                value={quote.AddonsRevenue}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+            </div>
+            <div class="revenue-details">
+              Cost:
+              <lightning-formatted-number
+                value={addonsCost}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+              &bull; Margin:
+              <lightning-formatted-number
+                value={addonsMargin}
+                format-style="currency"
+                currency-code="USD"
+              ></lightning-formatted-number>
+            </div>
+            <div class="revenue-count">{addonsCount} Add-on Items</div>
+          </div>
+
+          <!-- Approval History -->
+          <div class="revenue-card approval-card">
+            <div class="approval-header-row">
+              <h3 class="approval-title">Approval History</h3>
+              <lightning-button-icon
+                icon-name="utility:refresh"
+                size="xx-small"
+                variant="bare"
+                onclick={loadApprovalHistory}
+              ></lightning-button-icon>
+            </div>
+            <p class="approval-desc">
+              Track the approval process for this quote.
+            </p>
+
+            <template if:true={hasApprovalHistory}>
+              <div class="approval-history-list">
+                <template for:each={approvalHistory} for:item="step">
+                  <div key={step.id} class="approval-step">
+                    <div class="step-marker">
+                      <div class={step.markerClass}></div>
+                      <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                      <div class="step-header">
+                        <span class="step-actor">{step.actorName}</span>
+                        <span class="step-status-label"
+                          >{step.statusLabel}</span
+                        >
+                      </div>
+                      <template if:true={step.comments}>
+                        <div class="step-comment">"{step.comments}"</div>
+                      </template>
+                      <div class="step-date">{step.formattedDate}</div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template if:false={hasApprovalHistory}>
+              <div class="approval-placeholder">
+                <lightning-icon
+                  icon-name="utility:page"
+                  size="large"
+                ></lightning-icon>
+                <p>No approval history yet.</p>
+                <p class="approval-sub">
+                  Submit this quote for approval to see the approval process.
+                </p>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-grid">
+          <!-- Item Type Breakdown -->
+          <div class="chart-card">
+            <h3 class="chart-title">Item Type Breakdown</h3>
+            <p class="chart-subtitle">
+              Cost and margin distribution by item type
+            </p>
+            <div class="bar-chart">
+              <div class="bar-group">
+                <div class="bar-container">
+                  <div class="bar bar-cost" style={laborCostBarPct}></div>
+                  <div class="bar bar-margin" style={laborMarginBarPct}></div>
+                </div>
+                <span class="bar-label">Labor</span>
+              </div>
+              <div class="bar-group">
+                <div class="bar-container">
+                  <div class="bar bar-cost" style={productsCostBarPct}></div>
+                  <div
+                    class="bar bar-margin"
+                    style={productsMarginBarPct}
+                  ></div>
+                </div>
+                <span class="bar-label">Products</span>
+              </div>
+              <div class="bar-group">
+                <div class="bar-container">
+                  <div class="bar bar-cost" style={addonsCostBarPct}></div>
+                  <div class="bar bar-margin" style={addonsMarginBarPct}></div>
+                </div>
+                <span class="bar-label">Add-ons</span>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"
+                ><span class="legend-dot cost-dot"></span> Cost</span
+              >
+              <span class="legend-item"
+                ><span class="legend-dot margin-dot"></span> Margin</span
+              >
+            </div>
+          </div>
+
+          <!-- Phase Breakdown -->
+          <div class="chart-card">
+            <h3 class="chart-title">Phase Breakdown</h3>
+            <p class="chart-subtitle">
+              Cost and margin distribution by project phase
+            </p>
+            <div class="bar-chart">
+              <template for:each={phaseChartData} for:item="p">
+                <div class="bar-group" key={p.phase}>
+                  <div class="bar-container">
+                    <div class="bar bar-cost" style={p.costBarPct}></div>
+                    <div class="bar bar-margin" style={p.marginBarPct}></div>
+                  </div>
+                  <span class="bar-label">{p.phase}</span>
+                </div>
+              </template>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"
+                ><span class="legend-dot cost-dot"></span> Cost</span
+              >
+              <span class="legend-item"
+                ><span class="legend-dot margin-dot"></span> Margin</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase Summary Table -->
+        <template if:true={hasPhaseData}>
+          <div class="phase-table-card">
+            <table class="phase-table">
+              <thead>
+                <tr>
+                  <th>Phase</th>
+                  <th>Labor</th>
+                  <th>Products</th>
+                  <th>Add-ons</th>
+                  <th>Total</th>
+                  <th>Items</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={phaseData} for:item="row">
+                  <tr key={row.phase}>
+                    <td>{row.phase}</td>
+                    <td class="amount-labor">
+                      <lightning-formatted-number
+                        value={row.labor}
+                        format-style="currency"
+                        currency-code="USD"
+                      ></lightning-formatted-number>
+                    </td>
+                    <td class="amount-product">
+                      <lightning-formatted-number
+                        value={row.products}
+                        format-style="currency"
+                        currency-code="USD"
+                      ></lightning-formatted-number>
+                    </td>
+                    <td class="amount-addon">
+                      <lightning-formatted-number
+                        value={row.addons}
+                        format-style="currency"
+                        currency-code="USD"
+                      ></lightning-formatted-number>
+                    </td>
+                    <td>
+                      <lightning-formatted-number
+                        value={row.total}
+                        format-style="currency"
+                        currency-code="USD"
+                      ></lightning-formatted-number>
+                    </td>
+                    <td>{row.items}</td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+      </template>
+
+      <!-- LINE ITEMS TAB -->
+      <template if:true={isLineItemsActive}>
+        <c-quote-line-items-component
+          record-id={recordId}
+        ></c-quote-line-items-component>
+      </template>
+
+      <!-- TIMELINE TAB -->
+      <template if:true={isTimelineActive}>
+        <template if:true={hasTimeline}>
+          <div class="gantt-container">
+            <!-- Toolbar -->
+            <div class="gantt-toolbar">
+              <div class="gantt-legend">
+                <span class="legend-item"
+                  ><span class="legend-dot dot-product"></span> Product</span
+                >
+                <span class="legend-item"
+                  ><span class="legend-dot dot-addon"></span> Add-on</span
+                >
+                <span class="legend-item"
+                  ><span class="legend-dot dot-resource"></span> Resource
+                  Role</span
+                >
+              </div>
+              <div class="gantt-actions">
+                <lightning-button
+                  variant="brand"
+                  label="+ Add Milestone"
+                  onclick={handleAddMilestone}
+                ></lightning-button>
+              </div>
+            </div>
+
+            <!-- Chart Area -->
+            <div class="gantt-chart">
+              <!-- Header Layer -->
+              <div class="gantt-header-wrapper">
+                <div class="gantt-left-pane gantt-header-pane">
+                  <div class="col-issues">Issues</div>
+                  <div class="col-duration">Duration</div>
+                </div>
+                <div class="gantt-right-pane gantt-header-pane">
+                  <div class="gantt-years" style={ganttGridStyle}>
+                    <template for:each={ganttYears} for:item="yr">
+                      <div key={yr.key} class="year-cell" style={yr.style}>
+                        {yr.year}
+                      </div>
+                    </template>
+                  </div>
+                  <div class="gantt-months" style={ganttGridStyle}>
+                    <template for:each={ganttMonths} for:item="m">
+                      <div key={m.key} class="month-cell">{m.label}</div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Body Layer -->
+              <div class="gantt-body">
+                <template for:each={ganttPhases} for:item="phase">
+                  <!-- Phase Header Row -->
+                  <div key={phase.phaseName} class="gantt-phase-row">
+                    <div class="gantt-left-pane">
+                      <div class="phase-name">{phase.phaseName}</div>
+                    </div>
+                    <div
+                      class="gantt-right-pane gantt-phase-bg"
+                      style={ganttGridStyle}
+                    >
+                      <!-- Optionally put lines here, or leave empty if background lines are enough -->
+                      <template for:each={ganttMonths} for:item="m">
+                        <div key={m.key} class="grid-line"></div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Phase Items -->
+                  <template for:each={phase.items} for:item="item">
+                    <div key={item.id} class="gantt-item-row">
+                      <div class="gantt-left-pane">
+                        <div class="col-issues">
+                          <span class={item.dotClass}></span>
+                          <span class="item-name">{item.name}</span>
+                        </div>
+                        <div class="col-duration">{item.duration}</div>
+                      </div>
+                      <div class="gantt-right-pane item-bg">
+                        <!-- Background Grid Lines -->
+                        <div class="bg-lines" style={ganttGridStyle}>
+                          <template for:each={ganttMonths} for:item="m">
+                            <div key={m.key} class="grid-line"></div>
+                          </template>
+                        </div>
+                        <!-- Pill Wrapper (for positioning layout on CSS grid) -->
+                        <div class="pill-wrapper" style={ganttGridStyle}>
+                          <div class={item.pillClass} style={item.pillStyle}>
+                            <lightning-icon
+                              icon-name={item.iconName}
+                              size="xx-small"
+                              class="pill-icon"
+                            ></lightning-icon>
+                            <span class="pill-label">{item.name}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+        <template if:false={hasTimeline}>
+          <div class="placeholder-tab">
+            <lightning-icon
+              icon-name="utility:clock"
+              size="large"
+            ></lightning-icon>
+            <h2>No Timeline Available</h2>
+            <p>
+              Set a Start Date and End Date on this quote to generate the
+              timeline.
+            </p>
+          </div>
+        </template>
+      </template>
+
+      <!-- GENERATED PDFs TAB -->
+      <template if:true={isGeneratedPDFsActive}>
+        <div class="pdf-versions-section">
+          <h3 class="section-title">PDF Versions</h3>
+          <template if:true={hasPDFVersions}>
+            <table class="pdf-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Version</th>
+                  <th>Notes</th>
+                  <th>Total</th>
+                  <th>Margin</th>
+                  <th>Created</th>
+                  <th>Created By</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template
+                  for:each={pdfVersions}
+                  for:item="version"
+                  for:index="index"
+                >
+                  <tr key={version.id}>
+                    <td>{version.rowNumber}</td>
+                    <td>
+                      <span class="version-badge"
+                        >v{version.versionNumber}</span
+                      >
+                      <template if:true={version.isLatest}>
+                        <span class="latest-badge">Latest</span>
+                      </template>
+                    </td>
+                    <td class="notes-cell">{version.notesDisplay}</td>
+                    <td>
+                      <lightning-formatted-number
+                        value={version.totalPrice}
+                        format-style="currency"
+                        currency-code="USD"
+                      ></lightning-formatted-number>
+                    </td>
+                    <td>
+                      <span class="margin-value-text">
+                        <lightning-formatted-number
+                          value={version.marginDecimal}
+                          format-style="percent"
+                          maximum-fraction-digits="2"
+                        ></lightning-formatted-number>
+                      </span>
+                    </td>
+                    <td>{version.formattedDate}</td>
+                    <td>{version.createdByName}</td>
+                    <td class="actions-cell">
+                      <lightning-button-icon
+                        icon-name="utility:preview"
+                        alternative-text="View"
+                        data-id={version.contentDocumentId}
+                        onclick={handleViewVersion}
+                        variant="bare"
+                        size="small"
+                      ></lightning-button-icon>
+                      <lightning-button-icon
+                        icon-name="utility:download"
+                        alternative-text="Download"
+                        data-id={version.contentVersionId}
+                        onclick={handleDownloadVersion}
+                        variant="bare"
+                        size="small"
+                      ></lightning-button-icon>
+                      <lightning-button-icon
+                        icon-name="utility:delete"
+                        alternative-text="Delete"
+                        data-id={version.id}
+                        onclick={handleDeleteVersion}
+                        variant="bare"
+                        size="small"
+                        class="delete-icon"
+                      ></lightning-button-icon>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </template>
+          <template if:false={hasPDFVersions}>
+            <div class="placeholder-tab">
+              <lightning-icon
+                icon-name="utility:pdf_ext"
+                size="large"
+              ></lightning-icon>
+              <p>No PDF versions generated yet.</p>
+              <p class="sub-text">
+                Click "Generate PDF" to create your first version.
+              </p>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+    <!-- ─── Approval Modal ─── -->
+    <template if:true={showApprovalModal}>
+      <section
+        role="dialog"
+        tabindex="-1"
+        class="slds-modal slds-fade-in-open slds-modal_small"
+      >
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+            <button
+              class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+              title="Close"
+              onclick={closeModal}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                size="small"
+                variant="inverse"
+              ></lightning-icon>
+              <span class="slds-assistive-text">Close</span>
+            </button>
+            <h2 class="slds-text-heading_medium slds-hyphenate">
+              {modalTitle}
+            </h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_medium">
+            <p class="slds-m-bottom_small">{modalDescription}</p>
+            <lightning-textarea
+              label="Comments"
+              value={approvalComment}
+              onchange={handleCommentChange}
+              placeholder="Add your comments here..."
+              required={isRejectAction}
+            >
+            </lightning-textarea>
+          </div>
+          <footer class="slds-modal__footer">
+            <lightning-button
+              label="Cancel"
+              onclick={closeModal}
+              class="slds-m-right_x-small"
+            ></lightning-button>
+            <lightning-button
+              variant="brand"
+              label={modalButtonLabel}
+              onclick={handleApprovalAction}
+              disabled={isApprovalSubmitting}
+            ></lightning-button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+  </div>
 </template>

@@ -1,0 +1,649 @@
+<template>
+  <div class="settings-root">
+    <!-- ═══════════ SIDEBAR ═══════════ -->
+    <nav class="settings-sidebar">
+      <div class="sidebar-brand">
+        <h2 class="sidebar-title">Settings</h2>
+        <p class="sidebar-subtitle">
+          Manage your application preferences and organization settings
+        </p>
+      </div>
+      <ul class="sidebar-nav">
+        <li
+          class={companyInfoTabClass}
+          data-tab="CompanyInfo"
+          onclick={handleTabClick}
+        >
+          <a href="javascript:void(0);" class="nav-link">
+            <lightning-icon
+              icon-name="utility:company"
+              size="x-small"
+              class="nav-icon"
+              variant={companyInfoIconVariant}
+            ></lightning-icon>
+            Company Information
+          </a>
+        </li>
+        <li class={pdfTabClass} data-tab="PDF" onclick={handleTabClick}>
+          <a href="javascript:void(0);" class="nav-link">
+            <lightning-icon
+              icon-name="utility:pdf_ext"
+              size="x-small"
+              class="nav-icon"
+              variant={pdfIconVariant}
+            ></lightning-icon>
+            PDF
+          </a>
+        </li>
+        <li class={teamTabClass} data-tab="Team" onclick={handleTabClick}>
+          <a href="javascript:void(0);" class="nav-link">
+            <lightning-icon
+              icon-name="utility:people"
+              size="x-small"
+              class="nav-icon"
+              variant={teamIconVariant}
+            ></lightning-icon>
+            Team
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- ═══════════ CONTENT ═══════════ -->
+    <main class="settings-content">
+      <!-- ── COMPANY INFORMATION ── -->
+      <template if:true={isCompanyInfoTab}>
+        <div class="content-header slds-m-bottom_large">
+          <div class="slds-media slds-media_center">
+            <div class="slds-media__figure">
+              <div class="header-icon-wrap">
+                <lightning-icon
+                  icon-name="utility:company"
+                  size="small"
+                ></lightning-icon>
+              </div>
+            </div>
+            <div class="slds-media__body">
+              <h1 class="content-heading">Company Information</h1>
+              <p class="content-subheading">
+                Configure your organization details and preferences.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- General Info Card -->
+        <div class="card slds-m-bottom_medium">
+          <h3 class="card-section-title">General Information</h3>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label class="form-label">Company Name</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Enter company name"
+                value={companySettings.companyName}
+                data-field="companyName"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input
+                type="tel"
+                class="form-input"
+                placeholder="+1 (555) 000-0000"
+                value={companySettings.phone}
+                data-field="phone"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Website</label>
+              <input
+                type="url"
+                class="form-input"
+                placeholder="https://yourcompany.com"
+                value={companySettings.website}
+                data-field="website"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Industry</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="e.g. Technology"
+                value={companySettings.industry}
+                data-field="industry"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Default Currency</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="e.g. USD"
+                value={companySettings.currencyCode}
+                data-field="currencyCode"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Card -->
+        <div class="card slds-m-bottom_medium">
+          <h3 class="card-section-title">Address</h3>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label class="form-label">Address Line 1</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Street address"
+                value={companySettings.addressLine1}
+                data-field="addressLine1"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+          </div>
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="City"
+                value={companySettings.city}
+                data-field="city"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">State / Province</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="State"
+                value={companySettings.state}
+                data-field="state"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Country</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Country"
+                value={companySettings.country}
+                data-field="country"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Timezone</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="e.g. America/Los_Angeles"
+                value={companySettings.timezone}
+                data-field="timezone"
+                onchange={handleCompanyFieldChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            class="btn-save"
+            onclick={handleSaveCompanyInfo}
+            disabled={isSavingCompany}
+          >
+            <template if:true={isSavingCompany}>Saving...</template>
+            <template if:false={isSavingCompany}>Save Changes</template>
+          </button>
+        </div>
+      </template>
+
+      <!-- ── PDF SECTION ── -->
+      <template if:true={isPdfTab}>
+        <div class="content-header slds-m-bottom_large">
+          <div class="slds-media slds-media_center slds-grid_align-spread">
+            <div class="slds-media slds-media_center">
+              <div class="slds-media__figure">
+                <div class="header-icon-wrap">
+                  <lightning-icon
+                    icon-name="utility:pdf_ext"
+                    size="small"
+                  ></lightning-icon>
+                </div>
+              </div>
+              <div class="slds-media__body">
+                <h1 class="content-heading">Quote Template Manager</h1>
+                <p class="content-subheading">
+                  Manage PDF templates and view all generated quote documents.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Template Card -->
+        <div class="card slds-m-bottom_medium">
+          <div class="card-header-row">
+            <h3 class="card-section-title">Active Templates</h3>
+          </div>
+          <div class="template-card">
+            <div class="template-icon">
+              <lightning-icon
+                icon-name="utility:pdf_ext"
+                size="medium"
+              ></lightning-icon>
+            </div>
+            <div class="template-info">
+              <div class="template-name">Standard Quote PDF</div>
+              <div class="template-desc">
+                Default Provus Express Quoting template. Includes line items,
+                financials, and summary.
+              </div>
+            </div>
+            <div class="template-badges">
+              <span class="badge badge-default">Default</span>
+              <span class="badge badge-active">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PDF History -->
+        <div class="card">
+          <div class="card-header-row slds-m-bottom_medium">
+            <h3 class="card-section-title">Generated PDFs</h3>
+            <span class="pdf-count-badge">{pdfVersions.length} total</span>
+          </div>
+
+          <template if:true={isPdfLoading}>
+            <div class="loading-row">
+              <lightning-spinner
+                alternative-text="Loading..."
+                size="small"
+              ></lightning-spinner>
+              <span class="slds-m-left_small slds-text-color_weak"
+                >Loading PDF history...</span
+              >
+            </div>
+          </template>
+
+          <template if:false={isPdfLoading}>
+            <template if:true={hasPdfVersions}>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Quote</th>
+                      <th>Version</th>
+                      <th>Generated</th>
+                      <th>Size</th>
+                      <th>Generated By</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={pdfVersions} for:item="pdf">
+                      <tr key={pdf.id}>
+                        <td>
+                          <span class="pdf-quote-name">{pdf.quoteName}</span>
+                          <span class="pdf-quote-num">{pdf.quoteNumber}</span>
+                        </td>
+                        <td>
+                          <span class="version-badge"
+                            >v{pdf.versionNumber}</span
+                          >
+                        </td>
+                        <td>{pdf.formattedDate}</td>
+                        <td>{pdf.fileSizeKB}</td>
+                        <td>{pdf.createdByName}</td>
+                        <td class="action-cell">
+                          <template if:true={pdf.downloadUrl}>
+                            <a
+                              href={pdf.downloadUrl}
+                              target="_blank"
+                              class="action-link"
+                            >
+                              <lightning-icon
+                                icon-name="utility:download"
+                                size="x-small"
+                              ></lightning-icon>
+                            </a>
+                          </template>
+                          <button
+                            class="action-btn-danger"
+                            data-id={pdf.id}
+                            onclick={handleDeletePdf}
+                            title="Delete"
+                          >
+                            <lightning-icon
+                              icon-name="utility:delete"
+                              size="x-small"
+                              variant="error"
+                            ></lightning-icon>
+                          </button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+            <template if:false={hasPdfVersions}>
+              <div class="empty-state">
+                <lightning-icon
+                  icon-name="utility:pdf_ext"
+                  size="large"
+                  class="empty-icon"
+                ></lightning-icon>
+                <p class="empty-title">No PDFs Generated Yet</p>
+                <p class="empty-desc">
+                  PDF versions will appear here once quotes are exported.
+                </p>
+              </div>
+            </template>
+          </template>
+        </div>
+      </template>
+
+      <!-- ── TEAM SECTION ── -->
+      <template if:true={isTeamTab}>
+        <!-- Header Row -->
+        <div class="team-header slds-m-bottom_large">
+          <div class="slds-media slds-media_center">
+            <div class="slds-media__figure">
+              <div class="header-icon-wrap">
+                <lightning-icon
+                  icon-name="utility:people"
+                  size="small"
+                ></lightning-icon>
+              </div>
+            </div>
+            <div class="slds-media__body">
+              <h1 class="content-heading">Manage Your Team</h1>
+              <p class="content-subheading">
+                Manage user access, roles, and permissions.
+              </p>
+            </div>
+          </div>
+          <button class="btn-add-member" onclick={handleAddMember}>
+            <lightning-icon
+              icon-name="utility:add"
+              size="x-small"
+              class="slds-m-right_xx-small"
+            ></lightning-icon>
+            Team Member
+          </button>
+        </div>
+
+        <!-- Seats Stats -->
+        <div class="stats-bar slds-m-bottom_medium">
+          <div class="stat-block">
+            <div class="stat-value">{totalSeats}</div>
+            <div class="stat-label">TOTAL SEATS</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-block">
+            <div class="stat-value">{usedSeats}</div>
+            <div class="stat-label">USED SEATS</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-block">
+            <div class="stat-value">{availableSeats}</div>
+            <div class="stat-label">AVAILABLE</div>
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card">
+          <template if:true={hasUsers}>
+            <div class="table-wrap">
+              <table class="data-table users-table">
+                <thead>
+                  <tr>
+                    <th style="width: 36px"></th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Last Active</th>
+                    <th style="width: 48px"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={users} for:item="user">
+                    <tr key={user.Id} class="user-row">
+                      <td>
+                        <div class="avatar" style={user.avatarStyle}>
+                          {user.initials}
+                        </div>
+                      </td>
+                      <td class="user-name">{user.Name}</td>
+                      <td class="user-email">{user.Email}</td>
+                      <td>
+                        <span class={user.roleBadgeClass}
+                          >{user.Express_Role__c}</span
+                        >
+                      </td>
+                      <td>
+                        <div class="status-cell">
+                          <span class={user.statusDotClass}></span>
+                          <span>{user.statusLabel}</span>
+                        </div>
+                      </td>
+                      <td class="last-active">{user.relativeLastActive}</td>
+                      <td>
+                        <lightning-button-menu
+                          alternative-text="Actions"
+                          variant="bare"
+                          icon-name="utility:threedots"
+                          icon-size="x-small"
+                          menu-alignment="right"
+                          data-user-id={user.Id}
+                          onselect={handleMenuAction}
+                        >
+                          <lightning-menu-item
+                            value="edit"
+                            label="Edit"
+                          ></lightning-menu-item>
+                          <lightning-menu-item
+                            value="deactivate"
+                            label="Deactivate"
+                            class="danger-item"
+                          ></lightning-menu-item>
+                        </lightning-button-menu>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </template>
+          <template if:false={hasUsers}>
+            <template if:true={error}>
+              <div class="error-msg">{error}</div>
+            </template>
+            <template if:false={error}>
+              <div class="empty-state">
+                <lightning-icon
+                  icon-name="utility:people"
+                  size="large"
+                  class="empty-icon"
+                ></lightning-icon>
+                <p class="empty-title">No Team Members Found</p>
+              </div>
+            </template>
+          </template>
+        </div>
+      </template>
+    </main>
+  </div>
+
+  <!-- ═══════════ SLIDE PANEL: Create / Edit Team Member ═══════════ -->
+  <template if:true={isEditModalOpen}>
+    <div class="panel-backdrop" onclick={handleBackdropClick}></div>
+    <div class="slide-panel">
+      <div class="slide-panel-inner">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">{modalTitle}</h2>
+            <p class="panel-subtitle">{modalSubtitle}</p>
+          </div>
+          <button class="panel-close" onclick={closeEditModal}>
+            <lightning-icon
+              icon-name="utility:close"
+              size="small"
+            ></lightning-icon>
+          </button>
+        </div>
+
+        <div class="panel-body">
+          <div class="panel-field">
+            <label class="form-label required">First Name</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Enter first name"
+              value={selectedUser.FirstName}
+              data-field="FirstName"
+              onchange={handleInputChange}
+            />
+          </div>
+          <div class="panel-field">
+            <label class="form-label required">Last Name</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Enter last name"
+              value={selectedUser.LastName}
+              data-field="LastName"
+              onchange={handleInputChange}
+            />
+          </div>
+          <div class="panel-field">
+            <label class="form-label required">Email</label>
+            <input
+              type="email"
+              class="form-input"
+              placeholder="Enter email address"
+              value={selectedUser.Email}
+              data-field="Email"
+              onchange={handleInputChange}
+            />
+            <span class="field-hint"
+              >Email will also be used as the default username.</span
+            >
+          </div>
+          <div class="panel-field">
+            <label class="form-label required">Username</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Enter username (email format)"
+              value={selectedUser.Username}
+              data-field="Username"
+              onchange={handleInputChange}
+              disabled={isUpdatingUser}
+            />
+            <span class="field-hint"
+              >Must be in email format and be unique. Defaults to the email
+              address if not edited.</span
+            >
+          </div>
+
+          <!-- Role Selector -->
+          <div class="panel-field">
+            <label class="form-label required">Role</label>
+            <span class="field-hint slds-m-bottom_small" style="display: block"
+              >Choose a role to control access and responsibilities.</span
+            >
+
+            <div class={adminOptionClass} onclick={selectAdminRole}>
+              <span class="role-radio">
+                <input
+                  type="radio"
+                  name="roleSelect"
+                  value="Admin"
+                  checked={isRoleAdmin}
+                  onchange={selectAdminRole}
+                />
+              </span>
+              <div class="role-content">
+                <span class="role-name">Admin</span>
+                <span class="role-desc"
+                  >Full settings access and all Manager/User capabilities.</span
+                >
+              </div>
+            </div>
+
+            <div class={managerOptionClass} onclick={selectManagerRole}>
+              <span class="role-radio">
+                <input
+                  type="radio"
+                  name="roleSelect"
+                  value="Manager"
+                  checked={isRoleManager}
+                  onchange={selectManagerRole}
+                />
+              </span>
+              <div class="role-content">
+                <span class="role-name">Manager</span>
+                <span class="role-desc"
+                  >Can approve/reject quotes and manage team data while
+                  inheriting User access.</span
+                >
+              </div>
+            </div>
+
+            <div class={userOptionClass} onclick={selectUserRole}>
+              <span class="role-radio">
+                <input
+                  type="radio"
+                  name="roleSelect"
+                  value="User"
+                  checked={isRoleUser}
+                  onchange={selectUserRole}
+                />
+              </span>
+              <div class="role-content">
+                <span class="role-name">User</span>
+                <span class="role-desc"
+                  >Can edit own quotes, view others read-only, and manage
+                  catalog/account data.</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn-cancel" onclick={closeEditModal}>Cancel</button>
+          <button
+            class="btn-create"
+            onclick={handleUpdateRole}
+            disabled={isLoading}
+          >
+            <template if:true={isLoading}>Working...</template>
+            <template if:false={isLoading}>{modalButtonLabel}</template>
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+</template>

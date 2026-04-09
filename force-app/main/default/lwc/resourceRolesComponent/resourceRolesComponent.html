@@ -1,49 +1,140 @@
 <template>
-    <lightning-card title="Resource Roles" icon-name="standard:user">
-        <div class="slds-m-around_medium">
-            <div class="slds-grid slds-gutters slds-m-bottom_medium">
-                <div class="slds-col slds-size_1-of-2">
-                    <lightning-button label="New Resource Role" variant="brand" onclick={handleNewResource}></lightning-button>
-                </div>
-            </div>
+  <div class="roles-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-info">
+        <h1>Resource Roles</h1>
+        <p>Configure labor roles, rates, and billing units for your projects</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-ai-assistant" onclick={handleAIAssistant}>
+          <lightning-icon
+            icon-name="utility:magicwand"
+            size="x-small"
+            variant="inverse"
+            class="slds-m-right_x-small"
+          ></lightning-icon>
+          AI Assistant
+        </button>
+      </div>
+    </div>
 
-            <div style="height: 300px;">
-                <lightning-datatable
-                    key-field="Id"
-                    data={resources}
-                    columns={columns}
-                    draft-values={draftValues}
-                    onsave={handleSave}
-                    onrowaction={handleRowAction}
-                    hide-checkbox-column
-                ></lightning-datatable>
-            </div>
+    <!-- Main Content Card -->
+    <div class="premium-card">
+      <div class="card-title-row">
+        <h2>Role Catalog</h2>
+        <lightning-button
+          data-id="newButton"
+          label="New Resource Role"
+          variant="brand"
+          onclick={handleNewResource}
+          icon-name="utility:add"
+        ></lightning-button>
+      </div>
+
+      <!-- Datatable -->
+      <div class="table-container">
+        <lightning-datatable
+          key-field="Id"
+          data={resources}
+          columns={columns}
+          draft-values={draftValues}
+          onsave={handleSave}
+          onrowaction={handleRowAction}
+          hide-checkbox-column
+          class="slds-m-top_medium"
+        ></lightning-datatable>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Resource Role Modal -->
+  <template if:true={isModalOpen}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-labelledby="role-modal-heading"
+      aria-modal="true"
+      class="slds-modal slds-fade-in-open slds-modal_small"
+    >
+      <div class="slds-modal__container">
+        <header class="slds-modal__header">
+          <button
+            class="slds-button slds-button_icon slds-modal__close"
+            title="Close"
+            onclick={closeModal}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              alternative-text="close"
+              size="small"
+            ></lightning-icon>
+          </button>
+          <h2 id="role-modal-heading" class="slds-modal__title slds-hyphenate">
+            New Resource Role
+          </h2>
+        </header>
+        <div
+          class="slds-modal__content slds-p-around_medium"
+          id="role-modal-content"
+        >
+          <lightning-input
+            label="Role Name"
+            required
+            data-field="name"
+            value={newRole.name}
+            onchange={handleModalFieldChange}
+          ></lightning-input>
+          <lightning-combobox
+            label="Billing Unit"
+            value={newRole.billingUnit}
+            options={billingUnitOptions}
+            onchange={handleModalBillingChange}
+            class="slds-m-top_small"
+          ></lightning-combobox>
+          <lightning-input
+            label="Price"
+            type="number"
+            formatter="currency"
+            step="0.01"
+            data-field="price"
+            value={newRole.price}
+            onchange={handleModalFieldChange}
+            class="slds-m-top_small"
+          ></lightning-input>
+          <lightning-input
+            label="Cost"
+            type="number"
+            formatter="currency"
+            step="0.01"
+            data-field="cost"
+            value={newRole.cost}
+            onchange={handleModalFieldChange}
+            class="slds-m-top_small"
+          ></lightning-input>
+          <lightning-input
+            label="Location"
+            data-field="location"
+            value={newRole.location}
+            onchange={handleModalFieldChange}
+            class="slds-m-top_small"
+          ></lightning-input>
         </div>
-    </lightning-card>
-
-    <!-- New Resource Role Modal -->
-    <template if:true={isModalOpen}>
-        <section role="dialog" tabindex="-1" aria-labelledby="role-modal-heading" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_small">
-            <div class="slds-modal__container">
-                <header class="slds-modal__header">
-                    <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeModal}>
-                        <lightning-icon icon-name="utility:close" alternative-text="close" size="small"></lightning-icon>
-                    </button>
-                    <h2 id="role-modal-heading" class="slds-modal__title slds-hyphenate">New Resource Role</h2>
-                </header>
-                <div class="slds-modal__content slds-p-around_medium" id="role-modal-content">
-                    <lightning-input label="Role Name" required data-field="name" value={newRole.name} onchange={handleModalFieldChange}></lightning-input>
-                    <lightning-combobox label="Billing Unit" value={newRole.billingUnit} options={billingUnitOptions} onchange={handleModalBillingChange} class="slds-m-top_small"></lightning-combobox>
-                    <lightning-input label="Price" type="number" formatter="currency" step="0.01" data-field="price" value={newRole.price} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-input>
-                    <lightning-input label="Cost" type="number" formatter="currency" step="0.01" data-field="cost" value={newRole.cost} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-input>
-                    <lightning-input label="Location" data-field="location" value={newRole.location} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-input>
-                </div>
-                <footer class="slds-modal__footer">
-                    <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
-                    <lightning-button variant="brand" label="Save" onclick={handleSaveNewRole} class="slds-m-left_x-small"></lightning-button>
-                </footer>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
-    </template>
+        <footer class="slds-modal__footer">
+          <lightning-button
+            label="Cancel"
+            onclick={closeModal}
+          ></lightning-button>
+          <lightning-button
+            data-id="saveButton"
+            variant="brand"
+            label="Save"
+            onclick={handleSaveNewRole}
+            class="slds-m-left_x-small"
+          ></lightning-button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+  </template>
 </template>
