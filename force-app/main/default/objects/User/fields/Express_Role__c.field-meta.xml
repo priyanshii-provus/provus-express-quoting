@@ -3,10 +3,10 @@
     <fullName>Express_Role__c</fullName>
     <description
   >Role assigned to user in Provus Express Quoting app.</description>
-    <externalId>false</externalId>
     <label>Express Role</label>
     <required>false</required>
     <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>

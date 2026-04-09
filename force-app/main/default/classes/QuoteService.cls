@@ -122,6 +122,14 @@ public without sharing class QuoteService {
   }
 
   @AuraEnabled
+  public static Quote updateQuoteFields(Id quoteId, String description) {
+    Quote q = new Quote(Id = quoteId);
+    q.Description = description;
+    update q;
+    return getQuoteById(quoteId);
+  }
+
+  @AuraEnabled
   public static Quote cloneQuote(Id quoteId) {
     Quote original = [
       SELECT
@@ -281,26 +289,14 @@ public without sharing class QuoteService {
       Add_on__c = addonId
     );
 
-    if (q.Start_Date__c != null && q.End_Date__c != null) {
+    if (q.Start_Date__c != null) {
       item.Start_Date__c = q.Start_Date__c;
-      item.End_Date__c = q.End_Date__c;
 
-      if (itemType == 'Resource') {
-        Integer monthsBetween = q.Start_Date__c.monthsBetween(q.End_Date__c);
-        Integer extraDays = q.Start_Date__c.addMonths(monthsBetween)
-          .daysBetween(q.End_Date__c);
-        if (extraDays >= 15)
-          monthsBetween++;
-        if (monthsBetween == 0)
-          monthsBetween = 1;
-
-        if (q.Quote_Time_Period__c == 'Quarters') {
-          item.Quantity = Math.max(1, Math.round(monthsBetween / 3.0));
-        } else if (q.Quote_Time_Period__c == 'Years') {
-          item.Quantity = Math.max(1, Math.round(monthsBetween / 12.0));
-        } else {
-          item.Quantity = monthsBetween;
-        }
+      if (itemType == 'Labor' || itemType == 'Resource') {
+        // Calculate end date based on quantity (months)
+        item.End_Date__c = q.Start_Date__c.addMonths(Integer.valueOf(quantity));
+      } else if (q.End_Date__c != null) {
+        item.End_Date__c = q.End_Date__c;
       }
     }
 

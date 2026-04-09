@@ -2,6 +2,7 @@ public with sharing class QuoteLineItemTriggerHandler {
   public void beforeInsert(List<QuoteLineItem> newItems) {
     checkQuoteStatus(newItems);
     calculateCosts(newItems);
+    recalculateEndDates(newItems);
   }
 
   public void beforeUpdate(
@@ -10,6 +11,7 @@ public with sharing class QuoteLineItemTriggerHandler {
   ) {
     checkQuoteStatus(newItems);
     calculateCosts(newItems);
+    recalculateEndDates(newItems);
   }
 
   public void beforeDelete(List<QuoteLineItem> oldItems) {
@@ -21,17 +23,19 @@ public with sharing class QuoteLineItemTriggerHandler {
     Map<Id, Decimal> productRevenueMap = new Map<Id, Decimal>();
     Map<Id, Decimal> addonRevenueMap = new Map<Id, Decimal>();
     Map<Id, Decimal> totalCostMap = new Map<Id, Decimal>();
+    Map<Id, Date> maxEndDateMap = new Map<Id, Date>();
 
-    // Initialize all maps with zero for every quoteId
+    // Initialize all maps with zero/null for every quoteId
     for (Id qId : quoteIds) {
       laborRevenueMap.put(qId, 0);
       productRevenueMap.put(qId, 0);
       addonRevenueMap.put(qId, 0);
       totalCostMap.put(qId, 0);
+      maxEndDateMap.put(qId, null);
     }
 
     for (QuoteLineItem item : [
-      SELECT QuoteId, Item_Type__c, TotalPrice, Cost__c, Quantity
+      SELECT QuoteId, Item_Type__c, TotalPrice, Cost__c, Quantity, End_Date__c
       FROM QuoteLineItem
       WHERE QuoteId IN :quoteIds
     ]) {
@@ -41,6 +45,14 @@ public with sharing class QuoteLineItemTriggerHandler {
       Decimal lineRevenue = item.TotalPrice != null ? item.TotalPrice : 0;
 
       totalCostMap.put(item.QuoteId, totalCostMap.get(item.QuoteId) + lineCost);
+
+      if (
+        item.End_Date__c != null &&
+        (maxEndDateMap.get(item.QuoteId) == null ||
+        item.End_Date__c > maxEndDateMap.get(item.QuoteId))
+      ) {
+        maxEndDateMap.put(item.QuoteId, item.End_Date__c);
+      }
 
       if (item.Item_Type__c == 'Labor') {
         laborRevenueMap.put(
@@ -67,6 +79,21 @@ public with sharing class QuoteLineItemTriggerHandler {
       q.Products_Revenue__c = productRevenueMap.get(quoteId);
       q.Addons_Revenue__c = addonRevenueMap.get(quoteId);
       q.Total_Cost__c = totalCostMap.get(quoteId);
+      q.End_Date__c = maxEndDateMap.get(quoteId);
+
+      // Compute Margin Percentage: (Revenue - Cost) / Revenue * 100
+      Decimal totalRevenue =
+        laborRevenueMap.get(quoteId) +
+        productRevenueMap.get(quoteId) +
+        addonRevenueMap.get(quoteId);
+      Decimal totalCost = totalCostMap.get(quoteId);
+      if (totalRevenue != null && totalRevenue > 0) {
+        q.Margin_Percentage__c =
+          ((totalRevenue - totalCost) / totalRevenue) * 100;
+      } else {
+        q.Margin_Percentage__c = 0;
+      }
+
       quotesToUpdate.add(q);
     }
 
@@ -170,6 +197,43 @@ public with sharing class QuoteLineItemTriggerHandler {
         item.Cost__c = addon.Cost__c != null ? addon.Cost__c : 0;
         if (item.UnitPrice == null || item.UnitPrice == 0) {
           item.UnitPrice = addon.Price__c != null ? addon.Price__c : 0;
+        }
+      }
+    }
+  }
+
+  private void recalculateEndDates(List<QuoteLineItem> items) {
+    Set<Id> quoteIds = new Set<Id>();
+    for (QuoteLineItem item : items) {
+      if (
+        (item.Item_Type__c == 'Labor' || item.Item_Type__c == 'Resource') &&
+        item.QuoteId != null
+      ) {
+        quoteIds.add(item.QuoteId);
+      }
+    }
+
+    if (quoteIds.isEmpty()) {
+      return;
+    }
+
+    Map<Id, Quote> quoteMap = new Map<Id, Quote>(
+      [SELECT Id, Start_Date__c FROM Quote WHERE Id IN :quoteIds]
+    );
+
+    for (QuoteLineItem item : items) {
+      if (item.Item_Type__c == 'Labor' || item.Item_Type__c == 'Resource') {
+        Date startDate = item.Start_Date__c != null
+          ? item.Start_Date__c
+          : (quoteMap.containsKey(item.QuoteId)
+              ? quoteMap.get(item.QuoteId).Start_Date__c
+              : null);
+        if (startDate != null && item.Quantity != null) {
+          // Calculate end date based on quantity (total months)
+          // Using addMonths to extend from start date
+          item.End_Date__c = startDate.addMonths(
+            Integer.valueOf(item.Quantity)
+          );
         }
       }
     }

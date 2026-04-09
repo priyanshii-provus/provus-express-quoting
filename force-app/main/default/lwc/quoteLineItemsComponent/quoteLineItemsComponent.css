@@ -9,13 +9,10 @@
   --success-color: #04844b;
   --danger-color: #ea001e;
   --border-color: #e5e7eb;
-
-  /* Strict Label Propagation for Modals */
   --lwc-formLabelTextColor: var(--text-muted);
   --lwc-colorTextLabel: var(--text-muted);
   --sds-c-input-label-color: var(--text-muted);
   --sds-c-input-label-text-color: var(--text-muted);
-
   font-family:
     "Inter",
     system-ui,
@@ -76,25 +73,236 @@
 
 .premium-content {
   background: var(--bg-dark);
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
-.datatable-container {
-  background: #ffffff;
-  --lwc-colorTextDefault: #000000;
-  border-radius: 8px;
-  padding: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+/* Phase Table */
+.phase-table-container {
+  background: #fff;
   border: 1px solid var(--border-color);
-  height: 350px;
+  border-radius: 8px;
   overflow: hidden;
+}
+
+/* Table Header */
+.table-header {
+  display: grid;
+  grid-template-columns: 40px 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 50px;
+  background: #f8fafc;
+  border-bottom: 2px solid var(--border-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.th-cell {
+  padding: 0.75rem 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Phase Header Row */
+.phase-header-row {
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  background: #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
+  border-top: 2px solid #e2e8f0;
+  cursor: pointer;
+  gap: 0.5rem;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.phase-header-row:hover {
+  background: #e8edf3;
+}
+
+.phase-header-row:first-child {
+  border-top: none;
+}
+
+.phase-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.phase-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.add-item-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  margin-left: 1rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.add-item-link:hover {
+  background: #dbeafe;
+  color: var(--primary-color);
+}
+
+/* Item Row */
+.item-row {
+  display: grid;
+  grid-template-columns: 40px 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 50px;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+  font-size: 0.85rem;
+  transition: background 0.1s ease;
+}
+
+.item-row:hover {
+  background: #f8fafc;
+}
+
+.td-cell {
+  padding: 0.6rem 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-number {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.item-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.phase-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Inline Editing */
+.inline-input {
+  width: 100%;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.inline-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15);
+}
+
+.input-with-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.field-unit {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.readonly-unit-price {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.inline-input::-webkit-inner-spin-button,
+.inline-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.delete-btn {
+  --sds-c-button-icon-color-foreground: #94a3b8;
+  transition: all 0.15s ease;
+}
+
+.delete-btn:hover {
+  --sds-c-button-icon-color-foreground: var(--danger-color);
+}
+
+/* Total Row */
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  border-top: 2px solid var(--border-color);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.total-label {
+  color: var(--text-main);
+}
+
+.total-value {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+/* Item Type Picker */
+.item-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.item-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.item-type-card:hover {
+  border-color: var(--primary-color);
+  background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(1, 118, 211, 0.15);
 }
 
 /* Modals dark theme styling */
 .dark-modal .slds-modal__container {
   --sds-c-modal-color-background: var(--card-bg);
   --sds-c-modal-text-color: var(--text-main);
-  /* Input Label Overrides */
   --lwc-formLabelTextColor: var(--text-muted);
   --lwc-colorTextLabel: var(--text-muted);
   border-radius: 12px;

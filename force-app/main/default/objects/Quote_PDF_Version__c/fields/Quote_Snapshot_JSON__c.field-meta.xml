@@ -3,6 +3,7 @@
     <fullName>Quote_Snapshot_JSON__c</fullName>
     <label>Quote Snapshot JSON</label>
     <length>32768</length>
+    <trackTrending>false</trackTrending>
     <type>LongTextArea</type>
     <visibleLines>5</visibleLines>
 </CustomField>

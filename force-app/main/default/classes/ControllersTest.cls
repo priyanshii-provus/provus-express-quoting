@@ -285,7 +285,9 @@ private class ControllersTest {
       'New Prod',
       'NP001',
       'Desc',
-      'Hardware'
+      'Hardware',
+      0,
+      100
     );
     Test.stopTest();
     System.assertNotEquals(null, prod.Id);

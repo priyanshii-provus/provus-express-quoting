@@ -1,0 +1,93 @@
+<template>
+  <div class="feedback-container">
+    <!-- Dashboard Header -->
+    <div class="header">
+      <h1>User Feedback Wall</h1>
+      <p>What our team is saying about Provus Express Quoting</p>
+    </div>
+
+    <!-- Feedback Grid -->
+    <div class="feedback-grid">
+      <template for:each={feedbacks} for:item="fb">
+        <div key={fb.Id} class="feedback-card">
+          <div class="card-content">
+            <p class="feedback-text">{fb.Feedback_Text__c}</p>
+          </div>
+          <div class="card-footer">
+            <div class="author-box">
+              <span class="user-name">{fb.User_Name__c}</span>
+              <span class="date">{fb.formattedDate}</span>
+            </div>
+            <button
+              class="delete-btn"
+              onclick={handleDelete}
+              data-id={fb.Id}
+              title="Delete Feedback"
+            >
+              <lightning-icon
+                icon-name="utility:delete"
+                size="xx-small"
+              ></lightning-icon>
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Floating Feedback Action -->
+    <div class="floating-feedback">
+      <template if:false={isBoxOpen}>
+        <button class="fab" onclick={toggleBox} aria-label="Write Feedback">
+          <lightning-icon
+            icon-name="utility:record_create"
+            size="small"
+            variant="inverse"
+          ></lightning-icon>
+          <span>Give Feedback</span>
+        </button>
+      </template>
+
+      <template if:true={isBoxOpen}>
+        <div
+          class="writing-box slds-popover slds-popover_panel slds-nubbin_top-left"
+        >
+          <div class="writing-box-header">
+            <h2>New Feedback</h2>
+            <button class="close-btn" onclick={toggleBox}>&times;</button>
+          </div>
+          <div class="writing-box-body">
+            <p class="author-info">
+              Posting as: <strong>{currentUserName}</strong>
+            </p>
+            <lightning-textarea
+              class="feedback-textarea"
+              label="Your Feedback"
+              variant="label-hidden"
+              placeholder="Write your feedback here..."
+              value={newFeedbackText}
+              onchange={handleTextChange}
+            ></lightning-textarea>
+          </div>
+          <div class="writing-box-footer">
+            <button class="cancel-btn" onclick={toggleBox}>Cancel</button>
+            <button
+              class="submit-btn"
+              disabled={isSubmitDisabled}
+              onclick={handleSubmit}
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Loading Spinner -->
+    <template if:true={isLoading}>
+      <lightning-spinner
+        alternative-text="Loading"
+        size="medium"
+      ></lightning-spinner>
+    </template>
+  </div>
+</template>

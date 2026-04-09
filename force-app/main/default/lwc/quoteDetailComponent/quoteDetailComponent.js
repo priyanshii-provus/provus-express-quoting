@@ -11,6 +11,7 @@ import submitForApproval from "@salesforce/apex/QuoteApprovalController.submitFo
 import processApprovalAction from "@salesforce/apex/QuoteApprovalController.processApprovalAction";
 import getApprovalHistory from "@salesforce/apex/QuoteApprovalController.getApprovalHistory";
 import getCurrentUserRole from "@salesforce/apex/TeamController.getCurrentUserRole";
+import updateQuoteFields from "@salesforce/apex/QuoteService.updateQuoteFields";
 import Id from "@salesforce/user/Id";
 
 export default class QuoteDetailComponent extends NavigationMixin(
@@ -521,14 +522,29 @@ export default class QuoteDetailComponent extends NavigationMixin(
     );
   }
 
-  handleSave() {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: "Info",
-        message: "Use inline editing in Line Items tab to save changes",
-        variant: "info"
-      })
-    );
+  async handleSave() {
+    try {
+      await updateQuoteFields({
+        quoteId: this.recordId,
+        description: this.quote.Description
+      });
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Saved",
+          message: "Quote saved successfully",
+          variant: "success"
+        })
+      );
+      refreshApex(this.wiredQuoteResult);
+    } catch (error) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Error",
+          message: error.body?.message || "Failed to save quote",
+          variant: "error"
+        })
+      );
+    }
   }
 
   handleSubmitForApproval() {

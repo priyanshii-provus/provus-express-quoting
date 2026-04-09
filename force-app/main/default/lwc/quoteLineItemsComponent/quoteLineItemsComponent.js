@@ -10,74 +10,6 @@ import getAddons from "@salesforce/apex/AddonController.getAddons";
 import getQuoteById from "@salesforce/apex/QuoteService.getQuoteById";
 import { refreshApex } from "@salesforce/apex";
 
-const actions = [
-  { label: "Edit", name: "edit" },
-  { label: "Delete", name: "delete" }
-];
-
-const columns = [
-  { label: "Name", fieldName: "Name", type: "text" },
-  { label: "Task", fieldName: "Phase__c", type: "text", editable: true },
-  {
-    label: "Start Date",
-    fieldName: "Start_Date__c",
-    type: "date-local",
-    typeAttributes: {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      timeZone: "UTC"
-    }
-  },
-  {
-    label: "End Date",
-    fieldName: "End_Date__c",
-    type: "date-local",
-    typeAttributes: {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      timeZone: "UTC"
-    }
-  },
-  {
-    label: "Quantity (Months/Items)",
-    fieldName: "Quantity",
-    type: "number",
-    typeAttributes: { minimumFractionDigits: 0, maximumFractionDigits: 2 },
-    editable: true
-  },
-  {
-    label: "Base Rate",
-    fieldName: "BaseRateDisplay",
-    type: "currency",
-    typeAttributes: { currencyCode: "USD" }
-  },
-  {
-    label: "Unit Price",
-    fieldName: "UnitPrice",
-    type: "currency",
-    editable: true,
-    typeAttributes: { currencyCode: "USD" }
-  },
-  {
-    label: "Discount %",
-    fieldName: "Discount",
-    type: "number",
-    editable: true
-  },
-  {
-    label: "Total Price",
-    fieldName: "TotalPrice",
-    type: "currency",
-    typeAttributes: { currencyCode: "USD" }
-  },
-  {
-    type: "action",
-    typeAttributes: { rowActions: actions }
-  }
-];
-
 const PERIOD_HOURS = {
   Weeks: 40,
   Months: 160,
@@ -88,9 +20,14 @@ const PERIOD_HOURS = {
 export default class QuoteLineItemsComponent extends LightningElement {
   @api recordId;
   @track lineItems = [];
-  @track draftValues = [];
-  columns = columns;
   wiredLineItemsResult;
+
+  // Phase states
+  @track collapsedPhases = {};
+  @track isPhaseModalOpen = false;
+  @track newPhaseName = "";
+  @track isItemPickerOpen = false;
+  @track activePhase = "Default";
 
   // Modal states
   @track isProductModalOpen = false;
@@ -110,23 +47,8 @@ export default class QuoteLineItemsComponent extends LightningElement {
     if (data) {
       this.quoteTimePeriod = data.Quote_Time_Period__c || "Months";
       this.quoteStatus = data.Status;
-      this.updateColumns();
     } else if (error) {
       console.error("Error fetching Quote details", error);
-    }
-  }
-
-  updateColumns() {
-    if (this.isApproved) {
-      this.columns = columns
-        .map((col) => {
-          let newCol = { ...col };
-          if (newCol.editable) newCol.editable = false;
-          return newCol;
-        })
-        .filter((col) => col.type !== "action");
-    } else {
-      this.columns = [...columns];
     }
   }
 
@@ -142,7 +64,6 @@ export default class QuoteLineItemsComponent extends LightningElement {
   @track selectedRoleId = "";
   @track resourceQuantity = 1;
   @track resourceUnitPrice = 0;
-  @track resourcePhase = "";
   standardHours = 160;
   rolesMap = new Map();
 
@@ -157,26 +78,60 @@ export default class QuoteLineItemsComponent extends LightningElement {
   wiredLineItems(result) {
     this.wiredLineItemsResult = result;
     if (result.data) {
+      let rowCounter = 1;
       this.lineItems = result.data.map((row) => {
         let baseRate = row.UnitPrice || 0;
         if (row.Item_Type__c === "Labor" || row.Item_Type__c === "Resource") {
-          // Derives base rate back from the period Unit Price
           const multiplier = PERIOD_HOURS[this.quoteTimePeriod] || 160;
           baseRate = (row.UnitPrice || 0) / multiplier;
         }
 
+        const startDate = row.Start_Date__c
+          ? new Date(row.Start_Date__c + "T00:00:00").toLocaleDateString(
+              "en-US",
+              {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+              }
+            )
+          : "";
+        const endDate = row.End_Date__c
+          ? new Date(row.End_Date__c + "T00:00:00").toLocaleDateString(
+              "en-US",
+              {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+              }
+            )
+          : "";
+
+        const isResource =
+          row.Item_Type__c === "Labor" || row.Item_Type__c === "Resource";
         return {
           ...row,
+          rowNum: rowCounter++,
+          isResource: isResource,
           Name:
-            (row.Item_Type__c === "Labor" || row.Item_Type__c === "Resource") &&
-            row.Resource_Role__r
+            isResource && row.Resource_Role__r
               ? row.Resource_Role__r.Name
               : row.Item_Type__c === "Add-on" && row.Add_on__r
                 ? row.Add_on__r.Name
                 : row.Product2
                   ? row.Product2.Name
                   : "Item",
-          BaseRateDisplay: baseRate
+          BaseRateDisplay: baseRate,
+          formattedStartDate: startDate,
+          formattedEndDate: endDate,
+          displayQuantity: row.Quantity != null ? row.Quantity : 0,
+          quantityLabel: isResource ? "month(s)" : "item(s)",
+          unitPriceLabel: isResource ? "/month" : "",
+          calculationLogic: isResource
+            ? `Calculated as: Base Rate × ${PERIOD_HOURS[this.quoteTimePeriod] || 160} hours`
+            : "Calculated as: Base Rate (1:1)",
+          rawDiscount: row.Discount != null ? row.Discount : 0,
+          displayDiscount: row.Discount != null ? `${row.Discount}%` : ""
         };
       });
     } else if (result.error) {
@@ -184,6 +139,192 @@ export default class QuoteLineItemsComponent extends LightningElement {
     }
   }
 
+  /* ── Phase Grouping ── */
+  get phaseGroups() {
+    const groups = {};
+    const orderedPhases = [];
+
+    this.lineItems.forEach((item) => {
+      const phase = item.Phase__c || "Default";
+      if (!groups[phase]) {
+        groups[phase] = { phase, items: [], key: `phase-${phase}` };
+        orderedPhases.push(phase);
+      }
+      groups[phase].items.push(item);
+    });
+
+    return orderedPhases.map((p) => ({
+      ...groups[p],
+      isExpanded: !this.collapsedPhases[p]
+    }));
+  }
+
+  get grandTotal() {
+    return this.lineItems.reduce(
+      (sum, item) => sum + (item.TotalPrice || 0),
+      0
+    );
+  }
+
+  handleTogglePhase(event) {
+    event.stopPropagation();
+    const phase = event.currentTarget.dataset.phase;
+    this.collapsedPhases = {
+      ...this.collapsedPhases,
+      [phase]: !this.collapsedPhases[phase]
+    };
+  }
+
+  handleCollapseAll() {
+    const allCollapsed = {};
+    this.phaseGroups.forEach((g) => {
+      allCollapsed[g.phase] = true;
+    });
+    // If already all collapsed, expand all
+    const allAreCollapsed = this.phaseGroups.every(
+      (g) => this.collapsedPhases[g.phase]
+    );
+    if (allAreCollapsed) {
+      this.collapsedPhases = {};
+    } else {
+      this.collapsedPhases = allCollapsed;
+    }
+  }
+
+  /* ── Add Phase ── */
+  handleAddPhase() {
+    this.newPhaseName = "";
+    this.isPhaseModalOpen = true;
+  }
+
+  closePhaseModal() {
+    this.isPhaseModalOpen = false;
+  }
+
+  handlePhaseNameChange(event) {
+    this.newPhaseName = event.target.value;
+  }
+
+  handleCreatePhase() {
+    if (!this.newPhaseName || this.newPhaseName.trim().length === 0) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Error",
+          message: "Please enter a phase name",
+          variant: "error"
+        })
+      );
+      return;
+    }
+    // Phase is created when the first item is added to it
+    this.activePhase = this.newPhaseName.trim();
+    this.isPhaseModalOpen = false;
+    // Show the item picker to add an item to this new phase
+    this.isItemPickerOpen = true;
+  }
+
+  /* ── Add Item to Phase ── */
+  handleAddItemToPhase(event) {
+    event.stopPropagation();
+    this.activePhase = event.currentTarget.dataset.phase;
+    this.isItemPickerOpen = true;
+  }
+
+  handleAddItemGlobal() {
+    this.activePhase = "Default";
+    this.isItemPickerOpen = true;
+  }
+
+  closeItemPicker() {
+    this.isItemPickerOpen = false;
+  }
+
+  handlePickProduct() {
+    this.isItemPickerOpen = false;
+    this.handleAddProduct();
+  }
+  handlePickResource() {
+    this.isItemPickerOpen = false;
+    this.handleAddResource();
+  }
+  handlePickAddon() {
+    this.isItemPickerOpen = false;
+    this.handleAddAddon();
+  }
+
+  /* ── Delete ── */
+  handleDeleteItem(event) {
+    const itemId = event.currentTarget.dataset.id;
+    removeLineItem({ lineItemId: itemId })
+      .then(() => {
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Success",
+            message: "Item deleted",
+            variant: "success"
+          })
+        );
+        return refreshApex(this.wiredLineItemsResult);
+      })
+      .catch((e) => console.error(e));
+  }
+
+  handleItemAction() {
+    // Handled by individual menu item clicks
+  }
+
+  /* ── Inline Editing ── */
+  handleInlineChange(event) {
+    const itemId = event.target.dataset.id;
+    const field = event.target.dataset.field;
+    let value = parseFloat(event.target.value);
+
+    if (isNaN(value)) {
+      return;
+    }
+
+    const updateObj = { Id: itemId };
+
+    if (field === "BaseRate") {
+      // Find the item to check if it's a resource and get multiplier
+      const item = this.lineItems.find((i) => i.Id === itemId);
+      const isResource =
+        item &&
+        (item.Item_Type__c === "Labor" || item.Item_Type__c === "Resource");
+      const multiplier = isResource
+        ? PERIOD_HOURS[this.quoteTimePeriod] || 160
+        : 1;
+
+      updateObj.UnitPrice = value * multiplier;
+    } else {
+      updateObj[field] = value;
+    }
+
+    updateLineItems({ items: [updateObj] })
+      .then(() => {
+        const displayField = field === "BaseRate" ? "Base Rate" : field;
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Updated",
+            message: `${displayField} updated successfully`,
+            variant: "success"
+          })
+        );
+        return refreshApex(this.wiredLineItemsResult);
+      })
+      .catch((error) => {
+        console.error(error);
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Error",
+            message: error.body?.message || "Failed to update",
+            variant: "error"
+          })
+        );
+      });
+  }
+
+  /* ── Wire data sources ── */
   @wire(getPricebookEntries, { pricebookId: null })
   wiredPBEs({ data, error }) {
     if (data) {
@@ -220,10 +361,7 @@ export default class QuoteLineItemsComponent extends LightningElement {
     }
   }
 
-  get isSaveDisabled() {
-    return this.draftValues.length === 0;
-  }
-
+  /* ── Product Modal ── */
   handleAddProduct() {
     this.selectedPBEId = "";
     this.productQuantity = 1;
@@ -233,7 +371,6 @@ export default class QuoteLineItemsComponent extends LightningElement {
   closeProductModal() {
     this.isProductModalOpen = false;
   }
-
   handleProductChange(event) {
     this.selectedPBEId = event.detail.value;
     const pbe = this.pricebookMap.get(this.selectedPBEId);
@@ -243,9 +380,6 @@ export default class QuoteLineItemsComponent extends LightningElement {
   }
   handleProductQuantityChange(event) {
     this.productQuantity = event.target.value;
-  }
-  handleProductPriceChange(event) {
-    this.productUnitPrice = event.target.value;
   }
 
   handleSaveProduct() {
@@ -259,7 +393,7 @@ export default class QuoteLineItemsComponent extends LightningElement {
       unitPrice: this.productUnitPrice,
       resourceRoleId: null,
       durationHours: null,
-      phase: null,
+      phase: this.activePhase,
       itemType: "Product",
       addonId: null
     })
@@ -286,33 +420,26 @@ export default class QuoteLineItemsComponent extends LightningElement {
       });
   }
 
+  /* ── Resource Modal ── */
   handleAddResource() {
     this.selectedRoleId = "";
-
-    let defaultQuantity = 1;
     this.standardHours = PERIOD_HOURS[this.quoteTimePeriod] || 160;
-    this.resourceQuantity = defaultQuantity;
+    this.resourceQuantity = 1;
     this.resourceUnitPrice = 0;
-    this.resourcePhase = "";
     this.isResourceModalOpen = true;
   }
   closeResourceModal() {
     this.isResourceModalOpen = false;
   }
-
   handleResourceQuantityChange(event) {
     this.resourceQuantity = parseFloat(event.target.value);
   }
-
   handleResourceChange(event) {
     this.selectedRoleId = event.detail.value;
     const role = this.rolesMap.get(this.selectedRoleId);
     if (role) {
       this.resourceUnitPrice = (role.Price__c || 0) * this.standardHours;
     }
-  }
-  handleResourcePhaseChange(event) {
-    this.resourcePhase = event.target.value;
   }
 
   handleSaveResource() {
@@ -326,20 +453,6 @@ export default class QuoteLineItemsComponent extends LightningElement {
       );
       return;
     }
-    if (
-      !this.resourceQuantity ||
-      isNaN(this.resourceQuantity) ||
-      this.resourceQuantity <= 0
-    ) {
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Error",
-          message: "Please enter a valid duration (months)",
-          variant: "error"
-        })
-      );
-      return;
-    }
     addLineItem({
       quoteId: this.recordId,
       pricebookEntryId: null,
@@ -348,7 +461,7 @@ export default class QuoteLineItemsComponent extends LightningElement {
       unitPrice: this.resourceUnitPrice,
       resourceRoleId: this.selectedRoleId,
       durationHours: this.standardHours,
-      phase: this.resourcePhase,
+      phase: this.activePhase,
       itemType: "Labor",
       addonId: null
     })
@@ -375,6 +488,7 @@ export default class QuoteLineItemsComponent extends LightningElement {
       });
   }
 
+  /* ── Add-on Modal ── */
   handleAddAddon() {
     this.selectedAddonId = "";
     this.addonQuantity = 1;
@@ -405,7 +519,7 @@ export default class QuoteLineItemsComponent extends LightningElement {
       unitPrice: this.addonUnitPrice,
       resourceRoleId: null,
       durationHours: null,
-      phase: null,
+      phase: this.activePhase,
       itemType: "Add-on",
       addonId: this.selectedAddonId
     })
@@ -430,88 +544,5 @@ export default class QuoteLineItemsComponent extends LightningElement {
           })
         );
       });
-  }
-
-  handleSave(event) {
-    const records = event.detail.draftValues.map((draft) => {
-      const updateObj = { Id: draft.Id };
-      const originalRow = this.lineItems.find((item) => item.Id === draft.Id);
-
-      if (draft.Quantity !== undefined) {
-        if (originalRow && originalRow.Item_Type__c === "Labor") {
-          updateObj.Duration_Hours__c = draft.Quantity;
-          updateObj.Quantity = draft.Quantity;
-
-          if (originalRow.Start_Date__c && this.quoteTimePeriod) {
-            let start = new Date(originalRow.Start_Date__c);
-            start = new Date(
-              start.getTime() + start.getTimezoneOffset() * 60000
-            );
-            let amount = Number(draft.Quantity);
-
-            // The quantity always strictly determines the months duration for Resources
-            start.setMonth(start.getMonth() + amount);
-
-            const year = start.getFullYear();
-            const month = String(start.getMonth() + 1).padStart(2, "0");
-            const day = String(start.getDate()).padStart(2, "0");
-            updateObj.End_Date__c = `${year}-${month}-${day}`;
-          }
-        } else {
-          updateObj.Quantity = draft.Quantity;
-        }
-      }
-      if (draft.UnitPrice !== undefined) updateObj.UnitPrice = draft.UnitPrice;
-      if (draft.Discount !== undefined) updateObj.Discount = draft.Discount;
-
-      return updateObj;
-    });
-
-    updateLineItems({ items: records })
-      .then(() => {
-        this.dispatchEvent(
-          new ShowToastEvent({
-            title: "Success",
-            message: "Line items updated successfully",
-            variant: "success"
-          })
-        );
-        this.draftValues = [];
-        return refreshApex(this.wiredLineItemsResult);
-      })
-      .catch((error) => {
-        console.error(error);
-        this.dispatchEvent(
-          new ShowToastEvent({
-            title: "Error",
-            message: "Failed to update items",
-            variant: "error"
-          })
-        );
-      });
-  }
-
-  handleRowAction(event) {
-    const actionName = event.detail.action.name;
-    const row = event.detail.row;
-    switch (actionName) {
-      case "edit":
-        break;
-      case "delete":
-        removeLineItem({ lineItemId: row.Id })
-          .then(() => {
-            this.dispatchEvent(
-              new ShowToastEvent({
-                title: "Success",
-                message: "Item deleted",
-                variant: "success"
-              })
-            );
-            return refreshApex(this.wiredLineItemsResult);
-          })
-          .catch((e) => console.error(e));
-        break;
-      default:
-    }
   }
 }

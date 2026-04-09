@@ -49,6 +49,7 @@ public with sharing class QuotePDFController {
         Id,
         Product2.Name,
         Item_Type__c,
+        Phase__c,
         Quantity,
         UnitPrice,
         Discount,
@@ -58,7 +59,7 @@ public with sharing class QuotePDFController {
         Resource_Role__r.Name
       FROM QuoteLineItem
       WHERE QuoteId = :quoteId
-      ORDER BY Item_Type__c, CreatedDate ASC
+      ORDER BY Phase__c NULLS LAST, Item_Type__c, CreatedDate ASC
     ];
 
     // Compute financials from line items directly

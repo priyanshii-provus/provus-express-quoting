@@ -11,7 +11,8 @@ const MAIN_TABS = [
   "Resource Roles",
   "Products",
   "Add-ons",
-  "Settings"
+  "Settings",
+  "Feedback"
 ];
 
 export default class ExpressHomeLayout extends NavigationMixin(
@@ -111,6 +112,9 @@ export default class ExpressHomeLayout extends NavigationMixin(
   }
   get isSettings() {
     return this.selectedTab === "Settings";
+  }
+  get isFeedback() {
+    return this.selectedTab === "Feedback";
   }
 
   /** True when the selected tab has no built component to render */

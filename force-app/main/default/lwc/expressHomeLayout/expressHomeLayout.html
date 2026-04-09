@@ -185,6 +185,11 @@
           onnavigatetotab={handleNavigateToTab}
         ></c-settings-component>
       </template>
+      <template if:true={isFeedback}>
+        <c-feedback-dashboard
+          onnavigatetotab={handleNavigateToTab}
+        ></c-feedback-dashboard>
+      </template>
 
       <!-- Placeholder for unbuilt tabs -->
       <template if:true={isPlaceholder}>

@@ -13,41 +13,314 @@
       <div class="header-actions">
         <template if:false={isApproved}>
           <lightning-button
-            label="Add Product"
+            label="Collapse All"
+            icon-name="utility:chevrondown"
+            onclick={handleCollapseAll}
+            class="slds-m-right_small"
+          ></lightning-button>
+          <lightning-button
+            label="Add Phase"
             icon-name="utility:add"
-            onclick={handleAddProduct}
+            onclick={handleAddPhase}
             class="slds-m-right_small"
           ></lightning-button>
           <lightning-button
-            label="Add Resource"
-            icon-name="utility:user"
-            onclick={handleAddResource}
-            class="slds-m-right_small"
-          ></lightning-button>
-          <lightning-button
-            label="Add Add-ons"
-            icon-name="utility:package"
-            onclick={handleAddAddon}
+            label="Add Item"
+            icon-name="utility:add"
+            onclick={handleAddItemGlobal}
           ></lightning-button>
         </template>
       </div>
     </div>
 
     <div class="premium-content">
-      <!-- Editable Datatable -->
-      <div class="datatable-container">
-        <lightning-datatable
-          key-field="Id"
-          data={lineItems}
-          columns={columns}
-          draft-values={draftValues}
-          onsave={handleSave}
-          onrowaction={handleRowAction}
-          hide-checkbox-column
-        ></lightning-datatable>
+      <div class="phase-table-container">
+        <!-- Table Header -->
+        <div class="table-header">
+          <div class="th-cell th-checkbox"></div>
+          <div class="th-cell th-name">Name</div>
+          <div class="th-cell th-phase">Phase</div>
+          <div class="th-cell th-start">Start Date</div>
+          <div class="th-cell th-end">End Date</div>
+          <div class="th-cell th-qty">Quantity</div>
+          <div class="th-cell th-baserate">Base Rate</div>
+          <div class="th-cell th-unitprice">Unit Price</div>
+          <div class="th-cell th-discount">Discount %</div>
+          <div class="th-cell th-total">Total Price</div>
+          <div class="th-cell th-actions"></div>
+        </div>
+
+        <!-- Phase Groups -->
+        <template for:each={phaseGroups} for:item="group">
+          <div key={group.key} class="phase-group">
+            <!-- Phase Header Row -->
+            <div
+              class="phase-header-row"
+              onclick={handleTogglePhase}
+              data-phase={group.phase}
+            >
+              <div class="phase-toggle">
+                <template if:true={group.isExpanded}>
+                  <lightning-icon
+                    icon-name="utility:chevrondown"
+                    size="xx-small"
+                  ></lightning-icon>
+                </template>
+                <template if:false={group.isExpanded}>
+                  <lightning-icon
+                    icon-name="utility:chevronright"
+                    size="xx-small"
+                  ></lightning-icon>
+                </template>
+              </div>
+              <span class="phase-name">{group.phase}</span>
+              <template if:false={isApproved}>
+                <button
+                  class="add-item-link"
+                  onclick={handleAddItemToPhase}
+                  data-phase={group.phase}
+                >
+                  + ADD ITEM
+                </button>
+              </template>
+            </div>
+
+            <!-- Phase Items -->
+            <template if:true={group.isExpanded}>
+              <template for:each={group.items} for:item="item">
+                <div key={item.Id} class="item-row">
+                  <div class="td-cell td-checkbox">
+                    <span class="row-number">{item.rowNum}</span>
+                  </div>
+                  <div class="td-cell td-name">
+                    <span class="item-name">{item.Name}</span>
+                  </div>
+                  <div class="td-cell td-phase">
+                    <span class="phase-label">{item.Phase__c}</span>
+                  </div>
+                  <div class="td-cell td-start">{item.formattedStartDate}</div>
+                  <div class="td-cell td-end">{item.formattedEndDate}</div>
+                  <div class="td-cell td-qty">
+                    <template if:false={isApproved}>
+                      <div class="input-with-label">
+                        <input
+                          type="number"
+                          class="inline-input"
+                          value={item.displayQuantity}
+                          data-id={item.Id}
+                          data-field="Quantity"
+                          onchange={handleInlineChange}
+                          step="0.01"
+                          min="0"
+                        />
+                        <span class="field-unit">{item.quantityLabel}</span>
+                      </div>
+                    </template>
+                    <template if:true={isApproved}>
+                      {item.displayQuantity} {item.quantityLabel}
+                    </template>
+                  </div>
+                  <div class="td-cell td-baserate">
+                    <template if:false={isApproved}>
+                      <input
+                        type="number"
+                        class="inline-input"
+                        value={item.BaseRateDisplay}
+                        data-id={item.Id}
+                        data-field="BaseRate"
+                        onchange={handleInlineChange}
+                        step="0.01"
+                        min="0"
+                      />
+                    </template>
+                    <template if:true={isApproved}>
+                      <lightning-formatted-number
+                        value={item.BaseRateDisplay}
+                        format-style="currency"
+                        currency-code="USD"
+                      ></lightning-formatted-number>
+                    </template>
+                  </div>
+                  <div class="td-cell td-unitprice">
+                    <div
+                      class="readonly-unit-price"
+                      title={item.calculationLogic}
+                    >
+                      <lightning-formatted-number
+                        value={item.UnitPrice}
+                        format-style="currency"
+                        currency-code="USD"
+                      ></lightning-formatted-number>
+                      <template if:true={item.isResource}>
+                        <span class="field-unit">{item.unitPriceLabel}</span>
+                      </template>
+                    </div>
+                  </div>
+                  <div class="td-cell td-discount">
+                    <template if:false={isApproved}>
+                      <input
+                        type="number"
+                        class="inline-input"
+                        value={item.rawDiscount}
+                        data-id={item.Id}
+                        data-field="Discount"
+                        onchange={handleInlineChange}
+                        step="1"
+                        min="0"
+                        max="100"
+                      />
+                    </template>
+                    <template if:true={isApproved}>
+                      {item.displayDiscount}
+                    </template>
+                  </div>
+                  <div class="td-cell td-total">
+                    <lightning-formatted-number
+                      value={item.TotalPrice}
+                      format-style="currency"
+                      currency-code="USD"
+                    ></lightning-formatted-number>
+                  </div>
+                  <div class="td-cell td-actions">
+                    <template if:false={isApproved}>
+                      <lightning-button-icon
+                        icon-name="utility:delete"
+                        alternative-text="Delete"
+                        variant="bare"
+                        size="small"
+                        data-id={item.Id}
+                        onclick={handleDeleteItem}
+                        class="delete-btn"
+                      ></lightning-button-icon>
+                    </template>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </div>
+        </template>
+
+        <!-- Total Row -->
+        <div class="total-row">
+          <div class="total-label">Total</div>
+          <div class="total-value">
+            <lightning-formatted-number
+              value={grandTotal}
+              format-style="currency"
+              currency-code="USD"
+            ></lightning-formatted-number>
+          </div>
+        </div>
       </div>
 
-      <!-- Modal logic for Picker here -->
+      <!-- Add Phase Name Modal -->
+      <template if:true={isPhaseModalOpen}>
+        <section
+          role="dialog"
+          tabindex="-1"
+          class="slds-modal slds-fade-in-open dark-modal"
+        >
+          <div class="slds-modal__container">
+            <header class="slds-modal__header">
+              <button
+                class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                title="Close"
+                onclick={closePhaseModal}
+              >
+                <lightning-icon
+                  icon-name="utility:close"
+                  alternative-text="close"
+                  variant="inverse"
+                  size="small"
+                ></lightning-icon>
+              </button>
+              <h2 class="slds-modal__title slds-hyphenate">Add New Phase</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium custom-form">
+              <div class="custom-field">
+                <label><span class="required">*</span> Phase Name</label>
+                <lightning-input
+                  variant="label-hidden"
+                  type="text"
+                  value={newPhaseName}
+                  onchange={handlePhaseNameChange}
+                  placeholder="e.g. Discovery, Development, Testing"
+                  required
+                ></lightning-input>
+              </div>
+            </div>
+            <footer class="slds-modal__footer">
+              <lightning-button
+                label="Cancel"
+                onclick={closePhaseModal}
+              ></lightning-button>
+              <lightning-button
+                variant="brand"
+                label="Create Phase"
+                onclick={handleCreatePhase}
+                class="slds-m-left_x-small"
+              ></lightning-button>
+            </footer>
+          </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+
+      <!-- Item Type Picker Modal -->
+      <template if:true={isItemPickerOpen}>
+        <section
+          role="dialog"
+          tabindex="-1"
+          class="slds-modal slds-fade-in-open dark-modal"
+        >
+          <div class="slds-modal__container">
+            <header class="slds-modal__header">
+              <button
+                class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                title="Close"
+                onclick={closeItemPicker}
+              >
+                <lightning-icon
+                  icon-name="utility:close"
+                  alternative-text="close"
+                  variant="inverse"
+                  size="small"
+                ></lightning-icon>
+              </button>
+              <h2 class="slds-modal__title slds-hyphenate">
+                Add Item to {activePhase}
+              </h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+              <div class="item-type-grid">
+                <button class="item-type-card" onclick={handlePickProduct}>
+                  <lightning-icon
+                    icon-name="utility:product_required"
+                    size="medium"
+                  ></lightning-icon>
+                  <span>Product</span>
+                </button>
+                <button class="item-type-card" onclick={handlePickResource}>
+                  <lightning-icon
+                    icon-name="utility:user"
+                    size="medium"
+                  ></lightning-icon>
+                  <span>Resource</span>
+                </button>
+                <button class="item-type-card" onclick={handlePickAddon}>
+                  <lightning-icon
+                    icon-name="utility:package"
+                    size="medium"
+                  ></lightning-icon>
+                  <span>Add-on</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+
       <!-- Add Product Modal -->
       <template if:true={isProductModalOpen}>
         <section
@@ -167,7 +440,6 @@
                   required
                 ></lightning-input>
               </div>
-
               <div class="custom-field">
                 <label>Unit Price (Calculated)</label>
                 <lightning-input
@@ -178,15 +450,6 @@
                   step="0.01"
                   value={resourceUnitPrice}
                   read-only
-                ></lightning-input>
-              </div>
-              <div class="custom-field">
-                <label>Phase</label>
-                <lightning-input
-                  variant="label-hidden"
-                  type="text"
-                  value={resourcePhase}
-                  onchange={handleResourcePhaseChange}
                 ></lightning-input>
               </div>
             </div>

@@ -50,10 +50,11 @@ describe("c-quote-line-items-component", () => {
 
     await Promise.resolve();
 
-    const datatable = element.shadowRoot.querySelector("lightning-datatable");
-    expect(datatable).not.toBeNull();
-    expect(datatable.data.length).toBe(1);
-    expect(datatable.data[0].Name).toBe("Test Product");
+    const itemRows = element.shadowRoot.querySelectorAll(".item-row");
+    expect(itemRows.length).toBe(1);
+
+    const nameCell = element.shadowRoot.querySelector(".item-name");
+    expect(nameCell.textContent).toBe("Test Product");
   });
 
   it("hides edit buttons if quote is approved", async () => {

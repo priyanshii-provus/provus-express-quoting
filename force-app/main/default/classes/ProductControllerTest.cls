@@ -77,7 +77,9 @@ private class ProductControllerTest {
       'New Product',
       'NP001',
       'A new product',
-      'Software'
+      'Software',
+      0,
+      100
     );
     Test.stopTest();
     System.assertNotEquals(null, created.Id, 'Product should be created');
