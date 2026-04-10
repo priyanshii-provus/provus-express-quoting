@@ -9,7 +9,6 @@ import { refreshApex } from "@salesforce/apex";
 const actions = [
   { label: "View", name: "view" },
   { label: "Edit", name: "edit" },
-  { label: "Delete", name: "delete" },
   { label: "Clone", name: "clone" }
 ];
 

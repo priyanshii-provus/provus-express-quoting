@@ -1,3 +1,9 @@
+/**
+ * @description Selector class for Product and Pricebook Entry data retrieval.
+ * Responsibilities:
+ * - Querying Product2 records.
+ * - Retrieving standard Pricebook Entries with fallback behavior.
+ */
 public inherited sharing class ProductSelector {
   public static List<Product2> getProducts(Boolean activeOnly) {
     String query =
@@ -31,6 +37,14 @@ public inherited sharing class ProductSelector {
   }
 
   public static List<PricebookEntry> getPricebookEntries(Id pricebookId) {
+    if (pricebookId == null) {
+      try {
+        pricebookId = [SELECT Id FROM Pricebook2 WHERE IsStandard = TRUE LIMIT 1].Id;
+      } catch (Exception e) {
+        // Fallback to empty if no standard pricebook exists (extremely rare)
+      }
+    }
+
     return [
       SELECT
         Id,

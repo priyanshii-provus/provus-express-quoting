@@ -1,5 +1,12 @@
 <template>
   <div class="premium-card">
+    <!-- Loading Spinner Overlay -->
+    <template if:true={isSaving}>
+      <div class="saving-overlay">
+        <lightning-spinner alternative-text="Processing..." size="medium" variant="brand"></lightning-spinner>
+      </div>
+    </template>
+
     <div class="premium-header">
       <div class="premium-header-content">
         <lightning-icon
@@ -17,23 +24,27 @@
             icon-name="utility:chevrondown"
             onclick={handleCollapseAll}
             class="slds-m-right_small"
+            disabled={isSaving}
           ></lightning-button>
           <lightning-button
             label="Add Phase"
             icon-name="utility:add"
             onclick={handleAddPhase}
             class="slds-m-right_small"
+            disabled={isSaving}
           ></lightning-button>
           <lightning-button
             label="Profit Simulator"
             icon-name="utility:metrics"
             onclick={handleOpenSimulator}
             class="slds-m-right_small"
+            disabled={isSaving}
           ></lightning-button>
           <lightning-button
             label="Add Item"
             icon-name="utility:add"
             onclick={handleAddItemGlobal}
+            disabled={isSaving}
           ></lightning-button>
         </template>
       </div>
@@ -57,152 +68,168 @@
         </div>
 
         <!-- Phase Groups -->
-        <template for:each={phaseGroups} for:item="group">
-          <div key={group.key} class="phase-group">
-            <!-- Phase Header Row -->
-            <div
-              class="phase-header-row"
-              onclick={handleTogglePhase}
-              data-phase={group.phase}
-            >
-              <div class="phase-toggle">
-                <template if:true={group.isExpanded}>
-                  <lightning-icon
-                    icon-name="utility:chevrondown"
-                    size="xx-small"
-                  ></lightning-icon>
-                </template>
-                <template if:false={group.isExpanded}>
-                  <lightning-icon
-                    icon-name="utility:chevronright"
-                    size="xx-small"
-                  ></lightning-icon>
+        <template if:true={phaseGroups.length}>
+          <template for:each={phaseGroups} for:item="group">
+            <div key={group.key} class="phase-group">
+              <!-- Phase Header Row -->
+              <div
+                class="phase-header-row"
+                onclick={handleTogglePhase}
+                data-phase={group.phase}
+              >
+                <div class="phase-toggle">
+                  <template if:true={group.isExpanded}>
+                    <lightning-icon
+                      icon-name="utility:chevrondown"
+                      size="xx-small"
+                    ></lightning-icon>
+                  </template>
+                  <template if:false={group.isExpanded}>
+                    <lightning-icon
+                      icon-name="utility:chevronright"
+                      size="xx-small"
+                    ></lightning-icon>
+                  </template>
+                </div>
+                <span class="phase-name">{group.phase}</span>
+                <template if:false={isLocked}>
+                  <button
+                    class="add-item-link"
+                    onclick={handleAddItemToPhase}
+                    data-phase={group.phase}
+                    disabled={isSaving}
+                  >
+                    + ADD ITEM
+                  </button>
                 </template>
               </div>
-              <span class="phase-name">{group.phase}</span>
-              <template if:false={isLocked}>
-                <button
-                  class="add-item-link"
-                  onclick={handleAddItemToPhase}
-                  data-phase={group.phase}
-                >
-                  + ADD ITEM
-                </button>
-              </template>
-            </div>
 
-            <!-- Phase Items -->
-            <template if:true={group.isExpanded}>
-              <template for:each={group.items} for:item="item">
-                <div key={item.Id} class="item-row">
-                  <div class="td-cell td-checkbox">
-                    <span class="row-number">{item.rowNum}</span>
-                  </div>
-                  <div class="td-cell td-name">
-                    <span class="item-name">{item.Name}</span>
-                  </div>
-                  <div class="td-cell td-phase">
-                    <span class="phase-label">{item.Phase__c}</span>
-                  </div>
-                  <div class="td-cell td-start">{item.formattedStartDate}</div>
-                  <div class="td-cell td-end">{item.formattedEndDate}</div>
-                  <div class="td-cell td-qty">
-                    <template if:false={isLocked}>
-                      <div class="input-with-label">
+              <!-- Phase Items -->
+              <template if:true={group.isExpanded}>
+                <template for:each={group.items} for:item="item">
+                  <div key={item.Id} class="item-row">
+                    <div class="td-cell td-checkbox">
+                      <span class="row-number">{item.rowNum}</span>
+                    </div>
+                    <div class="td-cell td-name">
+                      <span class="item-name">{item.Name}</span>
+                    </div>
+                    <div class="td-cell td-phase">
+                      <span class="phase-label">{item.Phase__c}</span>
+                    </div>
+                    <div class="td-cell td-start">{item.formattedStartDate}</div>
+                    <div class="td-cell td-end">{item.formattedEndDate}</div>
+                    <div class="td-cell td-qty">
+                      <template if:false={isLocked}>
+                        <div class="input-with-label">
+                          <input
+                            type="number"
+                            class="inline-input"
+                            value={item.displayQuantity}
+                            data-id={item.Id}
+                            data-field="Quantity"
+                            onchange={handleInlineChange}
+                            step="0.01"
+                            min="0"
+                            disabled={isSaving}
+                          />
+                          <span class="field-unit">{item.quantityLabel}</span>
+                        </div>
+                      </template>
+                      <template if:true={isLocked}>
+                        {item.displayQuantity} {item.quantityLabel}
+                      </template>
+                    </div>
+                    <div class="td-cell td-baserate">
+                      <template if:false={isLocked}>
                         <input
                           type="number"
                           class="inline-input"
-                          value={item.displayQuantity}
+                          value={item.BaseRateDisplay}
                           data-id={item.Id}
-                          data-field="Quantity"
+                          data-field="BaseRate"
                           onchange={handleInlineChange}
                           step="0.01"
                           min="0"
+                          disabled={isSaving}
                         />
-                        <span class="field-unit">{item.quantityLabel}</span>
+                      </template>
+                      <template if:true={isLocked}>
+                        <lightning-formatted-number
+                          value={item.BaseRateDisplay}
+                          format-style="currency"
+                          currency-code="INR"
+                        ></lightning-formatted-number>
+                      </template>
+                    </div>
+                    <div class="td-cell td-unitprice">
+                      <div
+                        class="readonly-unit-price"
+                        title={item.calculationLogic}
+                      >
+                        <lightning-formatted-number
+                          value={item.UnitPrice}
+                          format-style="currency"
+                          currency-code="INR"
+                        ></lightning-formatted-number>
+                        <template if:true={item.isResource}>
+                          <span class="field-unit">{item.unitPriceLabel}</span>
+                        </template>
                       </div>
-                    </template>
-                    <template if:true={isLocked}>
-                      {item.displayQuantity} {item.quantityLabel}
-                    </template>
-                  </div>
-                  <div class="td-cell td-baserate">
-                    <template if:false={isLocked}>
-                      <input
-                        type="number"
-                        class="inline-input"
-                        value={item.BaseRateDisplay}
-                        data-id={item.Id}
-                        data-field="BaseRate"
-                        onchange={handleInlineChange}
-                        step="0.01"
-                        min="0"
-                      />
-                    </template>
-                    <template if:true={isLocked}>
+                    </div>
+                    <div class="td-cell td-discount">
+                      <template if:false={isLocked}>
+                        <input
+                          type="number"
+                          class="inline-input"
+                          value={item.rawDiscount}
+                          data-id={item.Id}
+                          data-field="Discount"
+                          onchange={handleInlineChange}
+                          step="1"
+                          min="0"
+                          max="100"
+                          disabled={isSaving}
+                        />
+                      </template>
+                      <template if:true={isLocked}>
+                        {item.displayDiscount}
+                      </template>
+                    </div>
+                    <div class="td-cell td-total">
                       <lightning-formatted-number
-                        value={item.BaseRateDisplay}
+                        value={item.TotalPrice}
                         format-style="currency"
                         currency-code="INR"
                       ></lightning-formatted-number>
-                    </template>
-                  </div>
-                  <div class="td-cell td-unitprice">
-                    <div
-                      class="readonly-unit-price"
-                      title={item.calculationLogic}
-                    >
-                      <lightning-formatted-number
-                        value={item.UnitPrice}
-                        format-style="currency"
-                        currency-code="INR"
-                      ></lightning-formatted-number>
-                      <template if:true={item.isResource}>
-                        <span class="field-unit">{item.unitPriceLabel}</span>
+                    </div>
+                    <div class="td-cell td-actions">
+                      <template if:false={isLocked}>
+                        <lightning-button-icon
+                          icon-name="utility:delete"
+                          alternative-text="Delete"
+                          variant="bare"
+                          size="small"
+                          data-id={item.Id}
+                          onclick={handleDeleteItem}
+                          class="delete-btn"
+                          disabled={isSaving}
+                        ></lightning-button-icon>
                       </template>
                     </div>
                   </div>
-                  <div class="td-cell td-discount">
-                    <template if:false={isLocked}>
-                      <input
-                        type="number"
-                        class="inline-input"
-                        value={item.rawDiscount}
-                        data-id={item.Id}
-                        data-field="Discount"
-                        onchange={handleInlineChange}
-                        step="1"
-                        min="0"
-                        max="100"
-                      />
-                    </template>
-                    <template if:true={isLocked}>
-                      {item.displayDiscount}
-                    </template>
-                  </div>
-                  <div class="td-cell td-total">
-                    <lightning-formatted-number
-                      value={item.TotalPrice}
-                      format-style="currency"
-                      currency-code="INR"
-                    ></lightning-formatted-number>
-                  </div>
-                  <div class="td-cell td-actions">
-                    <template if:false={isLocked}>
-                      <lightning-button-icon
-                        icon-name="utility:delete"
-                        alternative-text="Delete"
-                        variant="bare"
-                        size="small"
-                        data-id={item.Id}
-                        onclick={handleDeleteItem}
-                        class="delete-btn"
-                      ></lightning-button-icon>
-                    </template>
-                  </div>
-                </div>
+                </template>
               </template>
-            </template>
+            </div>
+          </template>
+        </template>
+
+        <!-- Empty State -->
+        <template if:false={phaseGroups.length}>
+          <div class="empty-state-container">
+            <lightning-icon icon-name="utility:shopping_bag" size="large"></lightning-icon>
+            <p>No line items added yet.</p>
+            <lightning-button label="Add Your First Item" onclick={handleAddItemGlobal} variant="brand" class="slds-m-top_medium"></lightning-button>
           </div>
         </template>
 

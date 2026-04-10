@@ -558,4 +558,57 @@ public class TeamControllerTest {
       TeamController.mockProtectedUser = false;
     }
   }
+
+  // ─── Permission Set Assignment ───
+  @isTest
+  static void testPermissionSetAssignment() {
+    User admin = [SELECT Id FROM User WHERE Express_Role__c = 'Admin' LIMIT 1];
+
+    // Mock Permission Sets if they don't exist in the test context
+    // Actually, in real orgs they exist. In unit tests, we rely on them being deployed.
+    
+    System.runAs(admin) {
+      Test.startTest();
+      
+      // 1. Test Manager assignment
+      String mgrEmail = 'mgr_perm@test' + DateTime.now().getTime() + '.com';
+      TeamController.createUserDetails('Manager', 'Mgr', 'Perm', mgrEmail, mgrEmail);
+      
+      // 2. Test User assignment
+      String userEmail = 'usr_perm@test' + DateTime.now().getTime() + '.com';
+      TeamController.createUserDetails('User', 'Usr', 'Perm', userEmail, userEmail);
+      
+      Test.stopTest();
+
+      // Verify Manager
+      User mgr = [SELECT Id FROM User WHERE Email = :mgrEmail LIMIT 1];
+      Integer mgrPsCount = [
+        SELECT COUNT() FROM PermissionSetAssignment 
+        WHERE AssigneeId = :mgr.Id AND PermissionSet.Name = 'Provus_Quote_Manager'
+      ];
+      System.assert(mgrPsCount > 0, 'Manager should have Provus_Quote_Manager assigned');
+
+      // Verify User
+      User usr = [SELECT Id FROM User WHERE Email = :userEmail LIMIT 1];
+      Integer usrPsCount = [
+        SELECT COUNT() FROM PermissionSetAssignment 
+        WHERE AssigneeId = :usr.Id AND PermissionSet.Name = 'Provus_Quote_User'
+      ];
+      System.assert(usrPsCount > 0, 'User should have Provus_Quote_User assigned');
+      
+      // 3. Test Role Sync (Manager -> User)
+      TeamController.updateUserDetails(mgr.Id, 'User', 'Mgr', 'Perm', mgrEmail);
+      
+      Integer mgrNewPsCount = [
+        SELECT COUNT() FROM PermissionSetAssignment 
+        WHERE AssigneeId = :mgr.Id AND PermissionSet.Name = 'Provus_Quote_User'
+      ];
+      Integer mgrOldPsCount = [
+        SELECT COUNT() FROM PermissionSetAssignment 
+        WHERE AssigneeId = :mgr.Id AND PermissionSet.Name = 'Provus_Quote_Manager'
+      ];
+      System.assert(mgrNewPsCount > 0, 'Should swap to Provus_Quote_User');
+      System.assertEquals(0, mgrOldPsCount, 'Should remove Provus_Quote_Manager');
+    }
+  }
 }

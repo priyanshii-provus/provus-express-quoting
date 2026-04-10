@@ -1,3 +1,6 @@
+/**
+ * @description Selector class for querying Add-on records.
+ */
 public inherited sharing class AddonSelector {
   public static List<Add_on__c> getAddons(Boolean activeOnly) {
     String query =

@@ -15,6 +15,10 @@ import updateQuoteFields from "@salesforce/apex/QuoteService.updateQuoteFields";
 import evaluateQuoteHealth from "@salesforce/apex/QuoteHealthAdvisor.evaluateQuoteHealth";
 import Id from "@salesforce/user/Id";
 
+/**
+ * @description Main Quote Detail Component for the Provus Express Quoting application.
+ * Manages the top-level quote views including Summary, Line Items, PDF Generation, and Approval Workflows.
+ */
 export default class QuoteDetailComponent extends NavigationMixin(
   LightningElement
 ) {
@@ -25,6 +29,7 @@ export default class QuoteDetailComponent extends NavigationMixin(
   @track activeTab = "summary";
   @track pdfVersions = [];
   @track isGenerating = false;
+  @track isSaving = false;
   @track approvalHistory = [];
   @track showApprovalModal = false;
   @track approvalComment = "";
@@ -563,6 +568,25 @@ export default class QuoteDetailComponent extends NavigationMixin(
   }
 
   async handleSave() {
+    if (this.isSaving) return;
+
+    // Client-side Date Validation
+    if (this.quote.StartDate && this.quote.EndDate) {
+      const start = new Date(this.quote.StartDate);
+      const end = new Date(this.quote.EndDate);
+      if (end < start) {
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Validation Error",
+            message: "End Date cannot be before the Start Date.",
+            variant: "error"
+          })
+        );
+        return;
+      }
+    }
+
+    this.isSaving = true;
     try {
       await updateQuoteFields({
         quoteId: this.recordId,
@@ -575,7 +599,7 @@ export default class QuoteDetailComponent extends NavigationMixin(
           variant: "success"
         })
       );
-      refreshApex(this.wiredQuoteResult);
+      return refreshApex(this.wiredQuoteResult);
     } catch (error) {
       this.dispatchEvent(
         new ShowToastEvent({
@@ -584,6 +608,8 @@ export default class QuoteDetailComponent extends NavigationMixin(
           variant: "error"
         })
       );
+    } finally {
+      this.isSaving = false;
     }
   }
 

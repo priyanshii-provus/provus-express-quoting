@@ -7,7 +7,6 @@ import deactivateUser from "@salesforce/apex/TeamController.deactivateUser";
 import resendSetupEmail from "@salesforce/apex/TeamController.resendSetupEmail";
 
 import getAllPDFVersions from "@salesforce/apex/AdminSettingsController.getAllPDFVersions";
-import getCompanySettings from "@salesforce/apex/AdminSettingsController.getCompanySettings";
 
 import deletePDFVersion from "@salesforce/apex/QuotePDFController.deletePDFVersion";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
@@ -61,7 +60,6 @@ function getInitials(firstName, lastName) {
 
 export default class SettingsComponent extends LightningElement {
   @track activeTab = "General";
-  @track companySettings = {};
   @track isSettingsLoading = false;
 
   // PDF
@@ -85,7 +83,6 @@ export default class SettingsComponent extends LightningElement {
   // ── Lifecycle ──────────────────────────
   connectedCallback() {
     this.loadLicenseCounts();
-    this.loadCompanySettings();
   }
 
   async loadLicenseCounts() {
@@ -99,23 +96,7 @@ export default class SettingsComponent extends LightningElement {
     }
   }
 
-  async loadCompanySettings() {
-    this.isSettingsLoading = true;
-    try {
-      const r = await getCompanySettings();
-      this.companySettings = r || {};
-    } catch (e) {
-      console.error("Settings load error", e);
-    } finally {
-      this.isSettingsLoading = false;
-    }
-  }
 
-  handleSettingsChange(event) {
-    const field = event.target.dataset.field;
-    const value = event.target.value;
-    this.companySettings = { ...this.companySettings, [field]: value };
-  }
 
   async loadPdfVersions() {
     this.isPdfLoading = true;
@@ -221,7 +202,6 @@ export default class SettingsComponent extends LightningElement {
   get generalIconVariant() {
     return this.activeTab === "General" ? "brand" : "";
   }
-
   get pdfIconVariant() {
     return this.activeTab === "PDF" ? "brand" : "";
   }

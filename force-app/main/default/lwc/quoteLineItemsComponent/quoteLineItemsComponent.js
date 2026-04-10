@@ -18,6 +18,10 @@ const PERIOD_HOURS = {
   Years: 1920
 };
 
+/**
+ * @description Component responsible for displaying and managing Quote Line Items.
+ * Handles adding, editing, deleting, and organizing items into phases (Products, Resources, Add-ons).
+ */
 export default class QuoteLineItemsComponent extends LightningElement {
   @api recordId;
   @track lineItems = [];
@@ -35,6 +39,7 @@ export default class QuoteLineItemsComponent extends LightningElement {
   @track isResourceModalOpen = false;
   @track isAddonModalOpen = false;
   @track isSimulatorModalOpen = false;
+  @track isSaving = false;
 
   handleOpenSimulator() {
     this.isSimulatorModalOpen = true;
@@ -410,7 +415,9 @@ export default class QuoteLineItemsComponent extends LightningElement {
   }
 
   handleSaveProduct() {
-    if (!this.selectedPBEId) return;
+    if (!this.selectedPBEId || this.isSaving) return;
+    this.isSaving = true;
+
     const pbe = this.pricebookMap.get(this.selectedPBEId);
     addLineItem({
       quoteId: this.recordId,
@@ -444,6 +451,9 @@ export default class QuoteLineItemsComponent extends LightningElement {
             variant: "error"
           })
         );
+      })
+      .finally(() => {
+        this.isSaving = false;
       });
   }
 
@@ -470,16 +480,20 @@ export default class QuoteLineItemsComponent extends LightningElement {
   }
 
   handleSaveResource() {
-    if (!this.selectedRoleId) {
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Error",
-          message: "Please select a resource role",
-          variant: "error"
-        })
-      );
+    if (!this.selectedRoleId || this.isSaving) {
+      if (!this.selectedRoleId) {
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Error",
+            message: "Please select a resource role",
+            variant: "error"
+          })
+        );
+      }
       return;
     }
+
+    this.isSaving = true;
     addLineItem({
       quoteId: this.recordId,
       pricebookEntryId: null,
@@ -512,6 +526,9 @@ export default class QuoteLineItemsComponent extends LightningElement {
             variant: "error"
           })
         );
+      })
+      .finally(() => {
+        this.isSaving = false;
       });
   }
 
@@ -537,7 +554,9 @@ export default class QuoteLineItemsComponent extends LightningElement {
   }
 
   handleSaveAddon() {
-    if (!this.selectedAddonId) return;
+    if (!this.selectedAddonId || this.isSaving) return;
+
+    this.isSaving = true;
     addLineItem({
       quoteId: this.recordId,
       pricebookEntryId: null,
@@ -570,6 +589,9 @@ export default class QuoteLineItemsComponent extends LightningElement {
             variant: "error"
           })
         );
+      })
+      .finally(() => {
+        this.isSaving = false;
       });
   }
 }

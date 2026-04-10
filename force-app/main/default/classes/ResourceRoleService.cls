@@ -1,3 +1,6 @@
+/**
+ * @description Service class managing business logic and DML operations for Resource Role records.
+ */
 public inherited sharing class ResourceRoleService {
   public static Resource_Role__c createResourceRole(
     String name,
