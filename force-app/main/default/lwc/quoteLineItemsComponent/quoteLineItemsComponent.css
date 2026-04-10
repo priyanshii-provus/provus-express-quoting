@@ -59,11 +59,12 @@
 }
 
 .premium-header-icon {
-  --sds-c-icon-color-foreground-default: var(--secondary-color);
-  background: rgba(1, 118, 211, 0.1);
+  background: var(--secondary-color);
   border-radius: 8px;
   padding: 0.5rem;
-  border: 1px solid var(--border-color);
+}
+.premium-header-icon lightning-icon {
+  --sds-c-icon-color-foreground-default: #ffffff;
 }
 
 .header-actions {

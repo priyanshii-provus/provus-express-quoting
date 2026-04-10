@@ -145,4 +145,115 @@ private class QuoteLineItemTriggerHandlerTest {
       'Total cost should be 0 after delete'
     );
   }
+
+  @isTest
+  static void testApprovedQuoteModificationBlock() {
+    Quote q = [SELECT Id FROM Quote LIMIT 1];
+    q.Status = 'Approved';
+    update q;
+
+    PricebookEntry pbe = [SELECT Id FROM PricebookEntry LIMIT 1];
+    QuoteLineItem item = new QuoteLineItem(
+      QuoteId = q.Id,
+      PricebookEntryId = pbe.Id,
+      Quantity = 1,
+      UnitPrice = 100
+    );
+
+    Test.startTest();
+    try {
+      insert item;
+      System.assert(false, 'Should have blocked insert on approved quote');
+    } catch (DmlException e) {
+      System.assert(e.getMessage().contains('approved or rejected quote'));
+    }
+    Test.stopTest();
+  }
+
+  @isTest
+  static void testPendingApprovalModificationBlock() {
+    Quote q = [SELECT Id FROM Quote LIMIT 1];
+    PricebookEntry pbe = [SELECT Id FROM PricebookEntry LIMIT 1];
+    
+    // Add an initial item so the quote has value > 0 for submission validation
+    insert new QuoteLineItem(
+      QuoteId = q.Id,
+      PricebookEntryId = pbe.Id,
+      Quantity = 1,
+      UnitPrice = 100
+    );
+
+    Test.startTest();
+    // Force rollups/async logic to fire
+    Test.stopTest();
+
+    q.Status = 'Pending Approval';
+    update q;
+    
+    // Create a regular user who is not manager or admin
+    Profile p = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+    User regularUser = new User(
+      Alias = 'regu',
+      Email = 'regular@testorg.com',
+      EmailEncodingKey = 'UTF-8',
+      LastName = 'Regular',
+      LanguageLocaleKey = 'en_US',
+      LocaleSidKey = 'en_US',
+      ProfileId = p.Id,
+      TimeZoneSidKey = 'America/Los_Angeles',
+      UserName = 'regu' + DateTime.now().getTime() + '@testorg.com',
+      Express_Role__c = 'User'
+    );
+    insert regularUser;
+
+    QuoteLineItem item = new QuoteLineItem(
+      QuoteId = q.Id,
+      PricebookEntryId = pbe.Id,
+      Quantity = 1,
+      UnitPrice = 100
+    );
+
+    System.runAs(regularUser) {
+      Test.startTest();
+      try {
+        insert item;
+        System.assert(false, 'Should have blocked insert on pending quote for regular user');
+      } catch (DmlException e) {
+        System.assert(e.getMessage().contains('pending approval'));
+      }
+      Test.stopTest();
+    }
+  }
+
+  @isTest
+  static void testMaxEndDateRollup() {
+    Quote q = [SELECT Id FROM Quote LIMIT 1];
+    PricebookEntry pbe = [SELECT Id FROM PricebookEntry LIMIT 1];
+
+    Date d1 = Date.today().addDays(10);
+    Date d2 = Date.today().addDays(20);
+
+    QuoteLineItem item1 = new QuoteLineItem(
+      QuoteId = q.Id,
+      PricebookEntryId = pbe.Id,
+      Quantity = 1,
+      UnitPrice = 100,
+      End_Date__c = d1
+    );
+    insert item1;
+
+    Test.startTest();
+    QuoteLineItem item2 = new QuoteLineItem(
+      QuoteId = q.Id,
+      PricebookEntryId = pbe.Id,
+      Quantity = 1,
+      UnitPrice = 100,
+      End_Date__c = d2
+    );
+    insert item2;
+    Test.stopTest();
+
+    Quote updated = [SELECT End_Date__c FROM Quote WHERE Id = :q.Id];
+    System.assertEquals(d2, updated.End_Date__c, 'Quote End_Date should be the max of line items');
+  }
 }

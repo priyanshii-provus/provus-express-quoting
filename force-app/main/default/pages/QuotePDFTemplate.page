@@ -224,7 +224,7 @@
                 </apex:outputText>
               </td>
               <td class="number">
-                <apex:outputText value="{0, number, $#,##0.00}">
+                <apex:outputText value="{0, number, ₹#,##0.00}">
                   <apex:param value="{!item.UnitPrice}" />
                 </apex:outputText>
               </td>
@@ -236,7 +236,7 @@
                 </apex:outputText>
               </td>
               <td class="number">
-                <apex:outputText value="{0, number, $#,##0.00}">
+                <apex:outputText value="{0, number, ₹#,##0.00}">
                   <apex:param value="{!item.TotalPrice}" />
                 </apex:outputText>
               </td>
@@ -251,7 +251,7 @@
         <tr>
           <td class="total-label">Subtotal</td>
           <td class="total-value">
-            <apex:outputText value="{0, number, $#,##0.00}">
+            <apex:outputText value="{0, number, ₹#,##0.00}">
               <apex:param value="{!computedSubtotal}" />
             </apex:outputText>
           </td>
@@ -259,7 +259,7 @@
         <tr>
           <td class="total-label">Discount</td>
           <td class="total-value">
-            <apex:outputText value="{0, number, $#,##0.00}">
+            <apex:outputText value="{0, number, ₹#,##0.00}">
               <apex:param value="{!computedDiscount}" />
             </apex:outputText>
           </td>
@@ -267,23 +267,15 @@
         <tr>
           <td class="total-label">Total Cost</td>
           <td class="total-value">
-            <apex:outputText value="{0, number, $#,##0.00}">
+            <apex:outputText value="{0, number, ₹#,##0.00}">
               <apex:param value="{!computedTotalCost}" />
-            </apex:outputText>
-          </td>
-        </tr>
-        <tr>
-          <td class="total-label">Margin</td>
-          <td class="total-value">
-            <apex:outputText value="{0, number, #,##0.00}%">
-              <apex:param value="{!computedMargin}" />
             </apex:outputText>
           </td>
         </tr>
         <tr class="grand-total">
           <td class="total-label">Total Revenue</td>
           <td class="total-value">
-            <apex:outputText value="{0, number, $#,##0.00}">
+            <apex:outputText value="{0, number, ₹#,##0.00}">
               <apex:param value="{!computedTotalRevenue}" />
             </apex:outputText>
           </td>

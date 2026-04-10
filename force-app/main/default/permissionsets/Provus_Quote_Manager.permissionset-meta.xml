@@ -29,6 +29,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>QuoteHealthAdvisor</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>QuotePDFController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -44,6 +48,10 @@
         <apexClass>TeamController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <pageAccesses>
+        <apexPage>QuotePDFTemplate</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
     <description>Full access to CPQ objects for quote managers</description>
     <fieldPermissions>
         <editable>false</editable>

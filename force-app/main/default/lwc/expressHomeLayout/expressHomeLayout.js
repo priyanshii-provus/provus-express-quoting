@@ -107,9 +107,6 @@ export default class ExpressHomeLayout extends NavigationMixin(
   get isAddons() {
     return this.selectedTab === "Add-ons";
   }
-  get isAIAssistant() {
-    return this.selectedTab === "AI Assistant";
-  }
   get isSettings() {
     return this.selectedTab === "Settings";
   }
@@ -190,9 +187,6 @@ export default class ExpressHomeLayout extends NavigationMixin(
   get addonsClass() {
     return this._cls("Add-ons");
   }
-  get aiAssistantClass() {
-    return this._cls("AI Assistant");
-  }
   get settingsClass() {
     return this._cls("Settings");
   }
@@ -215,9 +209,6 @@ export default class ExpressHomeLayout extends NavigationMixin(
   }
   get addonsVariant() {
     return this._var("Add-ons");
-  }
-  get aiAssistantVariant() {
-    return this._var("AI Assistant");
   }
   get settingsVariant() {
     return this._var("Settings");

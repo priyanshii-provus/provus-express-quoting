@@ -119,21 +119,4 @@ export default class AccountListComponent extends NavigationMixin(
       default:
     }
   }
-
-  handleAIAssistant() {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: "AI Assistant",
-        message: "Opening AI insights for Accounts...",
-        variant: "info"
-      })
-    );
-    this.dispatchEvent(
-      new CustomEvent("navigatetotab", {
-        detail: { tab: "AI Assistant" },
-        bubbles: true,
-        composed: true
-      })
-    );
-  }
 }

@@ -2,13 +2,15 @@
   <div class="premium-card">
     <div class="premium-header">
       <div class="premium-header-content">
-        <lightning-icon
-          icon-name="standard:sun"
-          size="medium"
-          class="premium-header-icon"
-          variant="inverse"
-        ></lightning-icon>
-        <h1>Good evening, Priyanshi !</h1>
+        <div class="greeting-box">
+          <div class="emoji-icon">
+            {greetingIcon}
+          </div>
+          <div class="greeting-text">
+            <h1>{greeting}, {userName}!</h1>
+            <p>Welcome back to your quote command center.</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -16,116 +18,93 @@
       <!-- Quote Insights Cards -->
       <div class="dashboard-insights-grid">
         <!-- Awaiting Your Approval -->
-        <div>
-          <div class="insight-card awaiting">
-            <h3 class="slds-text-heading_large">
-              {insights.awaitingApproval.count}
-            </h3>
-            <p class="slds-text-title slds-m-bottom_small">
-              Awaiting Your Approval
-            </p>
-            <p class="slds-text-body_small">
-              <lightning-formatted-number
-                value={insights.awaitingApproval.amount}
-                format-style="currency"
-                currency-code="USD"
-              ></lightning-formatted-number>
-              pending your review
-            </p>
-            <lightning-button
+        <div class="insight-card awaiting">
+          <h3 class="insight-large-num">{insights.awaitingApproval.count}</h3>
+          <p class="insight-title">Awaiting Your Approval</p>
+          <p class="insight-subtitle">
+            <lightning-formatted-number
+              value={insights.awaitingApproval.amount}
+              format-style="currency"
+              currency-code="INR"
+            ></lightning-formatted-number>pending your review
+          </p>
+          <lightning-button
               label="Review Now"
               variant="base"
               onclick={handleReviewNow}
-            ></lightning-button>
-          </div>
+          ></lightning-button>
         </div>
 
         <!-- Low Margin Drafts -->
-        <div>
-          <div class="insight-card low-margin">
-            <h3 class="slds-text-heading_large">{insights.lowMargin.count}</h3>
-            <p class="slds-text-title slds-m-bottom_small">Low Margin Drafts</p>
-            <p class="slds-text-body_small">
-              <lightning-formatted-number
-                value={insights.lowMargin.amount}
-                format-style="currency"
-                currency-code="USD"
-              ></lightning-formatted-number>
-              draft quotes at risk - margins below 15%
-            </p>
-            <lightning-button
+        <div class="insight-card low-margin">
+          <h3 class="insight-large-num">{insights.lowMargin.count}</h3>
+          <p class="insight-title">Low Margin Drafts</p>
+          <p class="insight-subtitle">
+            <lightning-formatted-number
+              value={insights.lowMargin.amount}
+              format-style="currency"
+              currency-code="INR"
+            ></lightning-formatted-number>draft quotes at risk<br/>- margins below 15%
+          </p>
+          <lightning-button
               label="Review Margins"
               variant="base"
               onclick={handleReviewMargins}
-            ></lightning-button>
-          </div>
+          ></lightning-button>
         </div>
 
         <!-- Draft Pipeline -->
-        <div>
-          <div class="insight-card draft">
-            <h3 class="slds-text-heading_large">
-              {insights.draftPipeline.count}
-            </h3>
-            <p class="slds-text-title slds-m-bottom_small">Draft Pipeline</p>
-            <p class="slds-text-body_small">
-              <lightning-formatted-number
-                value={insights.draftPipeline.amount}
-                format-style="currency"
-                currency-code="USD"
-              ></lightning-formatted-number>
-              potential revenue in drafts
-            </p>
-            <lightning-button
+        <div class="insight-card draft">
+          <h3 class="insight-large-num">{insights.draftPipeline.count}</h3>
+          <p class="insight-title">Draft Pipeline</p>
+          <p class="insight-subtitle">
+            <lightning-formatted-number
+              value={insights.draftPipeline.amount}
+              format-style="currency"
+              currency-code="INR"
+            ></lightning-formatted-number>potential revenue<br/>in drafts
+          </p>
+          <lightning-button
               label="View Drafts"
               variant="base"
               onclick={handleViewDrafts}
-            ></lightning-button>
-          </div>
+          ></lightning-button>
         </div>
 
         <!-- High Margin Deals -->
-        <div>
-          <div class="insight-card high-margin">
-            <h3 class="slds-text-heading_large">{insights.highMargin.count}</h3>
-            <p class="slds-text-title slds-m-bottom_small">High Margin Deals</p>
-            <p class="slds-text-body_small">
-              <lightning-formatted-number
-                value={insights.highMargin.amount}
-                format-style="currency"
-                currency-code="USD"
-              ></lightning-formatted-number>
-              with 35%+ profit margin
-            </p>
-            <lightning-button
+        <div class="insight-card high-margin">
+          <h3 class="insight-large-num">{insights.highMargin.count}</h3>
+          <p class="insight-title">High Margin Deals</p>
+          <p class="insight-subtitle">
+            <lightning-formatted-number
+              value={insights.highMargin.amount}
+              format-style="currency"
+              currency-code="INR"
+            ></lightning-formatted-number>with 35%+ profit<br/>margin
+          </p>
+          <lightning-button
               label="View Opportunities"
               variant="base"
               onclick={handleViewOpportunities}
-            ></lightning-button>
-          </div>
+          ></lightning-button>
         </div>
 
         <!-- Won This Month -->
-        <div>
-          <div class="insight-card won">
-            <h3 class="slds-text-heading_large">
-              {insights.wonThisMonth.count}
-            </h3>
-            <p class="slds-text-title slds-m-bottom_small">Won This Month</p>
-            <p class="slds-text-body_small">
-              <lightning-formatted-number
-                value={insights.wonThisMonth.amount}
-                format-style="currency"
-                currency-code="USD"
-              ></lightning-formatted-number>
-              closed won this month
-            </p>
-            <lightning-button
+        <div class="insight-card won">
+          <h3 class="insight-large-num">{insights.wonThisMonth.count}</h3>
+          <p class="insight-title">Won This Month</p>
+          <p class="insight-subtitle">
+            <lightning-formatted-number
+              value={insights.wonThisMonth.amount}
+              format-style="currency"
+              currency-code="INR"
+            ></lightning-formatted-number>closed won this month
+          </p>
+          <lightning-button
               label="View Wins"
               variant="base"
               onclick={handleViewWins}
-            ></lightning-button>
-          </div>
+          ></lightning-button>
         </div>
       </div>
 
@@ -223,9 +202,7 @@
                       ></lightning-input-field>
                     </div>
                     <div class="custom-field">
-                      <label
-                        ><span class="required">*</span> Opportunity Name</label
-                      >
+                      <label><span class="required">*</span> Opportunity Name</label>
                       <lightning-input-field
                         field-name="OpportunityId"
                         required

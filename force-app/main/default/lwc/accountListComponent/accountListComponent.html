@@ -1,34 +1,36 @@
 <template>
   <div class="accounts-container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="header-info">
-        <h1>Accounts</h1>
-        <p>Manage and track your customer accounts and relationships</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-ai-assistant" onclick={handleAIAssistant}>
+    <div class="premium-header">
+      <div class="premium-header-content">
+        <div class="greeting-box">
           <lightning-icon
-            icon-name="utility:magicwand"
-            size="x-small"
-            variant="inverse"
-            class="slds-m-right_x-small"
+            icon-name="standard:account"
+            size="medium"
+            class="premium-header-icon"
           ></lightning-icon>
-          AI Assistant
-        </button>
+          <div class="greeting-text">
+            <h1>Accounts</h1>
+            <p>Manage and track your customer accounts and relationships</p>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Main Content Card -->
     <div class="premium-card">
       <div class="card-title-row">
-        <h2>Account List</h2>
-        <lightning-button
-          label="New Account"
-          variant="brand"
-          onclick={handleNewAccount}
-          icon-name="utility:add"
-        ></lightning-button>
+        <div class="card-heading">
+          <h2>Account List</h2>
+          <span class="badge">{filteredAccounts.length} Accounts</span>
+        </div>
+        <button class="new-account-btn" onclick={handleNewAccount}>
+          <lightning-icon
+            icon-name="utility:add"
+            size="xx-small"
+            variant="inverse"
+          ></lightning-icon>
+          <span>New Account</span>
+        </button>
       </div>
 
       <!-- Filters -->

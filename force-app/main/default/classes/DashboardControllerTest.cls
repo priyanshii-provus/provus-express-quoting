@@ -12,9 +12,21 @@ private class DashboardControllerTest {
       acc.Id,
       Date.today().addDays(30)
     );
-    TestDataFactory.createQuote('Draft Quote', opp.Id, 'Draft');
-    TestDataFactory.createQuote('Pending Quote', opp.Id, 'Pending Approval');
-    TestDataFactory.createQuote('Accepted Quote', opp.Id, 'Accepted');
+    Quote draftQ = TestDataFactory.createQuote('Draft Quote', opp.Id, 'Draft');
+    Quote pendingQ = TestDataFactory.createQuote('Pending Quote', opp.Id, 'Draft');
+    Quote acceptedQ = TestDataFactory.createQuote('Accepted Quote', opp.Id, 'Draft');
+
+    // Create a product to give the quotes value, bypassing Cannot_Submit_Zero_Value
+    Map<String, Id> prodIds = TestDataFactory.createProduct('Test Product');
+    
+    // Add value to quotes
+    TestDataFactory.createQuoteLineItems(pendingQ.Id, prodIds.get('pricebookEntryId'), prodIds.get('productId'), 1);
+    TestDataFactory.createQuoteLineItems(acceptedQ.Id, prodIds.get('pricebookEntryId'), prodIds.get('productId'), 1);
+
+    // Update statuses safely
+    pendingQ.Status = 'Pending Approval';
+    acceptedQ.Status = 'Accepted';
+    update new List<Quote>{ pendingQ, acceptedQ };
   }
 
   @isTest

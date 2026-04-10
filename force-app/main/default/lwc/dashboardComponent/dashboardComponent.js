@@ -8,14 +8,30 @@ import { getRecord } from "lightning/uiRecordApi";
 import NAME_FIELD from "@salesforce/schema/User.Name";
 
 const COLUMNS = [
-  { label: "Quote Number", fieldName: "QuoteNumber", type: "text" },
-  { label: "Name", fieldName: "Name", type: "text" },
+  {
+    label: "Quote Number",
+    fieldName: "quoteUrl",
+    type: "url",
+    typeAttributes: {
+      label: { fieldName: "QuoteNumber" },
+      target: "_self"
+    }
+  },
+  {
+    label: "Name",
+    fieldName: "quoteUrl",
+    type: "url",
+    typeAttributes: {
+      label: { fieldName: "Name" },
+      target: "_self"
+    }
+  },
   { label: "Status", fieldName: "Status", type: "text" },
   {
     label: "Total Amount",
     fieldName: "TotalPrice",
     type: "currency",
-    typeAttributes: { currencyCode: "USD" }
+    typeAttributes: { currencyCode: "INR" }
   },
   {
     label: "Created Date",
@@ -44,7 +60,21 @@ export default class DashboardComponent extends NavigationMixin(
   @track recentQuotes = [];
   columns = COLUMNS;
   userId = Id;
-  userName = "";
+  userName = "User";
+
+  get greeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  }
+
+  get greetingIcon() {
+    const hour = new Date().getHours();
+    if (hour < 12) return '🌅';
+    if (hour < 17) return '☀️';
+    return '🌙';
+  }
 
   @track quoteStartDate = null;
   @track quoteEndDate = null;
@@ -81,7 +111,10 @@ export default class DashboardComponent extends NavigationMixin(
   @wire(getRecentQuotes)
   wiredQuotes({ error, data }) {
     if (data) {
-      this.recentQuotes = data;
+      this.recentQuotes = data.map((q) => ({
+        ...q,
+        quoteUrl: `/lightning/r/Quote/${q.Id}/view`
+      }));
     } else if (error) {
       console.error("Error loading recent quotes:", error);
     }
@@ -89,6 +122,10 @@ export default class DashboardComponent extends NavigationMixin(
 
   handleCreateQuote() {
     this.isQuoteModalOpen = true;
+  }
+
+  closeCreateQuoteModal() {
+    this.isQuoteModalOpen = false;
   }
 
   handleDateCalcChange(event) {

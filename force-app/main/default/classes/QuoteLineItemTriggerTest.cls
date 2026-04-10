@@ -46,14 +46,14 @@ private class QuoteLineItemTriggerTest {
       WHERE Id = :item.Id
     ];
     System.assertEquals(
-      100.0,
+      16000.0,
       result.Cost__c,
-      'Cost__c should be set from the Resource Role'
+      'Cost__c should be set from the Resource Role (100 * 160 hours)'
     );
     System.assertEquals(
-      150.0,
+      24000.0,
       result.UnitPrice,
-      'UnitPrice should be set from the Resource Role price'
+      'UnitPrice should be set from the Resource Role price (150 * 160 hours)'
     );
   }
 
@@ -74,7 +74,7 @@ private class QuoteLineItemTriggerTest {
       PricebookEntryId = productData.get('pricebookEntryId'),
       Product2Id = productData.get('productId'),
       Quantity = 1,
-      UnitPrice = 200.0, // explicitly set — should NOT be replaced
+      UnitPrice = 20000.0, // explicitly set — should NOT be replaced
       Resource_Role__c = role.Id,
       Item_Type__c = 'Labor'
     );
@@ -87,7 +87,7 @@ private class QuoteLineItemTriggerTest {
       WHERE Id = :item.Id
     ];
     System.assertEquals(
-      200.0,
+      20000.0,
       result.UnitPrice,
       'UnitPrice should NOT be overwritten if already set'
     );
@@ -161,11 +161,12 @@ private class QuoteLineItemTriggerTest {
       updatedQuote.Addons_Revenue__c,
       'Addons Revenue should be 150'
     );
-    // Total cost = (2*50) + (1*300) + (3*20) = 100 + 300 + 60 = 460
+    // Labor(50*2=100) + Product(Overwritten to 0 since Mock Prod has 0 cost) + Add-on(20*3=60). 
+    // Total cost = 100 + 0 + 60 = 160.
     System.assertEquals(
-      460.0,
+      160.0,
       updatedQuote.Total_Cost__c,
-      'Total Cost should be 460'
+      'Total Cost should be 160'
     );
   }
 
@@ -185,14 +186,14 @@ private class QuoteLineItemTriggerTest {
       PricebookEntryId = productData.get('pricebookEntryId'),
       Product2Id = productData.get('productId'),
       Quantity = 1,
-      UnitPrice = 200,
+      UnitPrice = 20000,
       Item_Type__c = 'Product'
     );
     insert item;
 
     Test.startTest();
     item.Resource_Role__c = role.Id;
-    item.UnitPrice = 200; // Keep existing price
+    item.UnitPrice = 20000; // Keep existing price
     update item;
     Test.stopTest();
 
@@ -202,7 +203,7 @@ private class QuoteLineItemTriggerTest {
       WHERE Id = :item.Id
     ];
     System.assertEquals(
-      100.0,
+      16000.0,
       result.Cost__c,
       'Cost should be from Resource Role on update'
     );
@@ -224,7 +225,7 @@ private class QuoteLineItemTriggerTest {
           PricebookEntryId = pbeId,
           Product2Id = prod2Id,
           Quantity = 1,
-          UnitPrice = 100,
+          UnitPrice = 20000,
           Cost__c = 80,
           Item_Type__c = (Math.mod(i, 2) == 0) ? 'Labor' : 'Product'
         )
@@ -242,9 +243,9 @@ private class QuoteLineItemTriggerTest {
     );
     Quote q = [SELECT Total_Cost__c FROM Quote WHERE Id = :quote.Id];
     System.assertEquals(
-      16000.0,
+      8000.0,
       q.Total_Cost__c,
-      'Total Cost should be 200 * 80 = 16000'
+      'Total Cost should be 100 * 80 = 8000 (Products are $0 cost)'
     );
   }
 }

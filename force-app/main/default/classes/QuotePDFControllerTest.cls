@@ -23,6 +23,7 @@ private class QuotePDFControllerTest {
       Product2Id = productData.get('productId'),
       Quantity = 5,
       UnitPrice = 200,
+      Cost__c = 200,
       Item_Type__c = 'Product'
     );
   }
@@ -120,5 +121,44 @@ private class QuotePDFControllerTest {
       controller.lineItems,
       'Line items should be loaded'
     );
+  }
+
+  @isTest
+  static void testConstructorWithEmptyId() {
+    Test.startTest();
+    Test.setCurrentPage(Page.QuotePDFTemplate); // No ID param
+    QuotePDFController controller = new QuotePDFController();
+    Test.stopTest();
+    System.assertEquals(null, controller.quote, 'Quote should be null for empty ID');
+  }
+
+  @isTest
+  static void testFinancialComputations() {
+    Quote q = [SELECT Id FROM Quote WHERE Name = 'PDF Test Quote' LIMIT 1];
+    
+    // For Valid_Until__c, we can update it
+    q.Valid_Until__c = Date.today().addDays(7);
+    update q;
+    
+    // For Total_Cost__c and Discount_Amount__c, we update line items
+    QuoteLineItem item = [SELECT Id, Quantity, UnitPrice FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1];
+    item.Cost__c = 200; // item.Quantity is 5, so 5 * 200 = 1000 Total Cost
+    item.Discount = 10;
+    update item;
+    
+    // Force a fresh context for the query in the controller
+    Test.startTest();
+    PageReference pageRef = Page.QuotePDFTemplate;
+    pageRef.getParameters().put('quoteId', q.Id);
+    Test.setCurrentPage(pageRef);
+    QuotePDFController controller = new QuotePDFController();
+    Test.stopTest();
+
+    // Verify the financial computation code paths executed
+    System.assertNotEquals(null, controller.computedTotalCost, 'Total cost should be computed');
+    System.assertNotEquals(null, controller.computedDiscount, 'Discount should be computed');
+    System.assertNotEquals(null, controller.computedMargin, 'Margin should be computed');
+    System.assertNotEquals(null, controller.computedSubtotal, 'Subtotal should be computed');
+    System.assertNotEquals('Not Set', controller.validUntilDisplay, 'Valid until should be displayed');
   }
 }

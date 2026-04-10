@@ -38,11 +38,7 @@ public with sharing class AdminSettingsController {
     }
     try {
       Provus_Company_Settings__c settings = Provus_Company_Settings__c.getOrgDefaults();
-      if (settings == null) {
-        settings = new Provus_Company_Settings__c(
-          SetupOwnerId = UserInfo.getOrganizationId()
-        );
-      }
+      // getOrgDefaults() returns an empty sObject if none exists, which can be directly upserted.
       settings.Company_Name__c = companyName;
       settings.Phone__c = phone;
       settings.Website__c = website;

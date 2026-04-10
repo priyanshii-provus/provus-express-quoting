@@ -161,4 +161,40 @@ private class ProductControllerTest {
     System.assertNotEquals(null, pbe.Id, 'PricebookEntry should be created');
     System.assertEquals(1500, pbe.UnitPrice, 'Unit price should be 1500');
   }
+
+  @isTest
+  static void testUpdateProducts() {
+    List<Product2> prods = [SELECT Id, Name FROM Product2];
+    for (Product2 p : prods) {
+      p.Description = 'Updated';
+    }
+    Test.startTest();
+    ProductController.updateProducts(prods);
+    Test.stopTest();
+    System.assertEquals('Updated', [SELECT Description FROM Product2 LIMIT 1].Description);
+  }
+
+  @isTest
+  static void testImportProducts() {
+    List<Map<String, String>> data = new List<Map<String, String>>();
+    data.add(new Map<String, String>{
+      'Name' => 'Imported Prod',
+      'ProductCode' => 'IP001',
+      'Price' => '200',
+      'Cost' => '100',
+      'Family' => 'Services',
+      'Description' => 'Imported',
+      'Is_Active' => 'true'
+    });
+    data.add(new Map<String, String>{
+      'Name' => '', // Skip
+      'Price' => '50'
+    });
+    Test.startTest();
+    Integer count = ProductController.importProducts(data);
+    Test.stopTest();
+    System.assertEquals(1, count);
+    Product2 result = [SELECT Cost__c FROM Product2 WHERE Name = 'Imported Prod'];
+    System.assertEquals(100, result.Cost__c);
+  }
 }

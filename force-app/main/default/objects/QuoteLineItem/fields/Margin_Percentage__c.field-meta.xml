@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Margin_Percentage__c</fullName>
     <description>Margin percentage: (Margin / UnitPrice) * 100</description>
-    <formula>IF(UnitPrice = 0, 0, (Margin__c / UnitPrice) * 100)</formula>
+    <formula>IF((UnitPrice * Quantity) = 0, 0, Margin__c / (UnitPrice * Quantity))</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Margin Percentage</label>
     <precision>18</precision>

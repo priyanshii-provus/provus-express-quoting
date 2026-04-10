@@ -1,7 +1,13 @@
 {
   "orgName": "Provus Express Quoting",
   "edition": "enterprise",
-  "features": ["Communities", "ServiceCloud"],
+  "language": "en_IN",
+  "country": "IN",
+  "features": [
+    "Communities",
+    "ServiceCloud",
+    "Einstein1AIPlatform"
+  ],
   "settings": {
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true
@@ -13,6 +19,12 @@
       "sessionSettings": {
         "forceRelogin": false
       }
+    },
+    "einsteinGptSettings": {
+      "enableEinsteinGptPlatform": true
+    },
+    "agentPlatformSettings": {
+      "enableAgentPlatform": true
     }
   }
 }

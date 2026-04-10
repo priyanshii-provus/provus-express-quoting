@@ -53,10 +53,18 @@
           disabled={isGenerating}
         ></lightning-button>
         <lightning-button
-          variant="brand"
-          label="Save"
-          onclick={handleSave}
+          variant="brand-outline"
+          label="Analyze Quote Health"
+          onclick={handleAnalyzeHealth}
+          class="slds-m-right_x-small slds-m-left_x-small"
         ></lightning-button>
+        <template if:false={isLocked}>
+          <lightning-button
+            variant="brand"
+            label="Save"
+            onclick={handleSave}
+          ></lightning-button>
+        </template>
         <lightning-button-icon
           icon-name="utility:refresh"
           alternative-text="Refresh"
@@ -68,7 +76,9 @@
 
     <!-- ─── Description ─── -->
     <div class="description-row">
-      <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+      <template if:false={isLocked}>
+        <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+      </template>
       <span class="description-text">
         <template if:true={quote.Description}>{quote.Description}</template>
         <template if:false={quote.Description}
@@ -85,7 +95,7 @@
           <lightning-formatted-number
             value={quote.TotalPrice}
             format-style="currency"
-            currency-code="USD"
+            currency-code="INR"
           ></lightning-formatted-number>
         </span>
       </div>
@@ -95,7 +105,7 @@
           <lightning-formatted-number
             value={quote.Subtotal}
             format-style="currency"
-            currency-code="USD"
+            currency-code="INR"
           ></lightning-formatted-number>
         </span>
       </div>
@@ -193,7 +203,7 @@
 
         <!-- Revenue Cards Row -->
         <div class="revenue-grid">
-          <!-- Labor Revenue -->
+          <!-- Resource Role Revenue -->
           <div class="revenue-card">
             <div class="revenue-header">
               <div class="revenue-title">
@@ -201,7 +211,7 @@
                   icon-name="standard:resource_absence"
                   size="x-small"
                 ></lightning-icon>
-                <span>Labor Revenue</span>
+                <span>Resource Role Revenue</span>
               </div>
               <span class="margin-badge margin-positive"
                 >↗ {laborMarginPct}%</span
@@ -211,7 +221,7 @@
               <lightning-formatted-number
                 value={quote.LaborRevenue}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
             </div>
             <div class="revenue-details">
@@ -219,13 +229,13 @@
               <lightning-formatted-number
                 value={laborCost}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
               &bull; Margin:
               <lightning-formatted-number
                 value={laborMargin}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
             </div>
             <div class="revenue-count">{laborCount} Resource Roles</div>
@@ -249,7 +259,7 @@
               <lightning-formatted-number
                 value={quote.ProductsRevenue}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
             </div>
             <div class="revenue-details">
@@ -257,13 +267,13 @@
               <lightning-formatted-number
                 value={productsCost}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
               &bull; Margin:
               <lightning-formatted-number
                 value={productsMargin}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
             </div>
             <div class="revenue-count">{productsCount} Products</div>
@@ -287,7 +297,7 @@
               <lightning-formatted-number
                 value={quote.AddonsRevenue}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
             </div>
             <div class="revenue-details">
@@ -295,13 +305,13 @@
               <lightning-formatted-number
                 value={addonsCost}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
               &bull; Margin:
               <lightning-formatted-number
                 value={addonsMargin}
                 format-style="currency"
-                currency-code="USD"
+                currency-code="INR"
               ></lightning-formatted-number>
             </div>
             <div class="revenue-count">{addonsCount} Add-on Items</div>
@@ -375,7 +385,7 @@
                   <div class="bar bar-cost" style={laborCostBarPct}></div>
                   <div class="bar bar-margin" style={laborMarginBarPct}></div>
                 </div>
-                <span class="bar-label">Labor</span>
+                <span class="bar-label">Resource Role</span>
               </div>
               <div class="bar-group">
                 <div class="bar-container">
@@ -440,7 +450,7 @@
               <thead>
                 <tr>
                   <th>Phase</th>
-                  <th>Labor</th>
+                  <th>Resource Role</th>
                   <th>Products</th>
                   <th>Add-ons</th>
                   <th>Total</th>
@@ -455,28 +465,28 @@
                       <lightning-formatted-number
                         value={row.labor}
                         format-style="currency"
-                        currency-code="USD"
+                        currency-code="INR"
                       ></lightning-formatted-number>
                     </td>
                     <td class="amount-product">
                       <lightning-formatted-number
                         value={row.products}
                         format-style="currency"
-                        currency-code="USD"
+                        currency-code="INR"
                       ></lightning-formatted-number>
                     </td>
                     <td class="amount-addon">
                       <lightning-formatted-number
                         value={row.addons}
                         format-style="currency"
-                        currency-code="USD"
+                        currency-code="INR"
                       ></lightning-formatted-number>
                     </td>
                     <td>
                       <lightning-formatted-number
                         value={row.total}
                         format-style="currency"
-                        currency-code="USD"
+                        currency-code="INR"
                       ></lightning-formatted-number>
                     </td>
                     <td>{row.items}</td>
@@ -486,10 +496,82 @@
             </table>
           </div>
         </template>
+
       </template>
 
       <!-- LINE ITEMS TAB -->
       <template if:true={isLineItemsActive}>
+
+        <!-- ─── Smart Margin AI Advisor Panel ─── -->
+        <template if:true={showHealthAdvisor}>
+          <div class="health-advisor-container slds-m-bottom_medium slds-p-around_medium" style="background: white; border-radius: 8px; border: 1px solid #e5e7eb; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+            <button class="slds-button slds-button_icon slds-button_icon-small" style="position: absolute; right: 12px; top: 12px;" onclick={handleCloseHealth} title="Close">
+              <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+            </button>
+            <h3 class="slds-text-heading_small slds-m-bottom_medium" style="display: flex; align-items: center; gap: 8px; font-weight: 600;">
+              <lightning-icon icon-name="utility:magicwand" size="small" variant="brand"></lightning-icon>
+              Smart Margin AI Advisor
+            </h3>
+
+            <!-- Loading State -->
+            <template if:true={isHealthLoading}>
+              <div class="slds-p-around_large slds-text-align_center" style="min-height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <lightning-spinner alternative-text="Analyzing..." size="medium" style="position: relative; top: auto; display: inline-block; margin-bottom: 20px;"></lightning-spinner>
+                <p style="color: #6b7280; font-weight: 500;">Analyzing quote health and calculating recommendations...</p>
+              </div>
+            </template>
+
+            <!-- Results -->
+            <template if:false={isHealthLoading}>
+              <template if:true={healthScore}>
+                <div class="slds-grid slds-wrap" style="gap: 24px;">
+                  <!-- Left side: Score -->
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-text-align_center" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #f3f4f6;">
+                    <div style="font-weight: 600; color: #4b5563; margin-bottom: 4px;">Health Score</div>
+                    <div style="font-size: 36px; font-weight: 800; color: #111827; line-height: 1;">
+                      {healthScore.score}<span style="font-size: 18px; color: #6b7280; font-weight: 600;">/100</span>
+                    </div>
+                    <div style="display: inline-block; position: relative; margin-top: 12px; margin-bottom: 8px;">
+                      <lightning-progress-ring value={healthScore.score} size="large" variant={healthRingVariant}></lightning-progress-ring>
+                    </div>
+                    <div>
+                      <span class={healthBadgeClass}>
+                        <lightning-icon icon-name={healthScore.statusIcon} size="xx-small" class="slds-m-right_xxx-small" variant="inverse"></lightning-icon>
+                        {healthScore.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Right side: Recommendations -->
+                  <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-4" style="flex: 1;">
+                    <div style="font-weight: 600; color: #374151; margin-bottom: 12px;">Recommendations</div>
+                    <template if:true={processedRecommendations}>
+                      <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <template for:each={processedRecommendations} for:item="rec" for:index="index">
+                          <div key={rec.title} style={rec.bgStyle} class="slds-p-around_small slds-border_bottom">
+                            <div style="margin-top: 2px;">
+                              <lightning-icon icon-name={rec.icon} size="small" variant={rec.iconVariant}></lightning-icon>
+                            </div>
+                            <div style="flex: 1;">
+                              <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                                <span>{rec.title}</span>
+                                <template if:true={rec.impact}>
+                                  <span style="font-size: 0.8rem; font-weight: 500; color: #ef4444;">-{rec.impact} pts</span>
+                                </template>
+                              </div>
+                              <div style="color: #4b5563; font-size: 0.9rem; line-height: 1.4;">{rec.detail}</div>
+                            </div>
+                          </div>
+                        </template>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </div>
+        </template>
+
         <c-quote-line-items-component
           record-id={recordId}
         ></c-quote-line-items-component>
@@ -513,13 +595,7 @@
                   Role</span
                 >
               </div>
-              <div class="gantt-actions">
-                <lightning-button
-                  variant="brand"
-                  label="+ Add Milestone"
-                  onclick={handleAddMilestone}
-                ></lightning-button>
-              </div>
+              <div class="gantt-actions"></div>
             </div>
 
             <!-- Chart Area -->
@@ -655,7 +731,7 @@
                       <lightning-formatted-number
                         value={version.totalPrice}
                         format-style="currency"
-                        currency-code="USD"
+                        currency-code="INR"
                       ></lightning-formatted-number>
                     </td>
                     <td>

@@ -1,33 +1,27 @@
 <template>
-  <div class="settings-root-container">
+  <div class="settings-container">
     <!-- Page Header -->
-    <div class="page-header">
-      <div class="header-info">
-        <h1>Settings</h1>
-        <p>Manage your application preferences and organization settings</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-ai-assistant" onclick={handleAIAssistant}>
+    <div class="premium-header">
+      <div class="premium-header-content">
+        <div class="greeting-box">
           <lightning-icon
-            icon-name="utility:magicwand"
-            size="x-small"
+            icon-name="utility:settings"
+            size="medium"
+            class="premium-header-icon"
             variant="inverse"
-            class="slds-m-right_x-small"
           ></lightning-icon>
-          AI Assistant
-        </button>
+          <div class="greeting-text">
+            <h1>Settings</h1>
+            <p>Manage your application preferences and organization settings</p>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
 
-    <div class="settings-root">
+    <div class="settings-root premium-card">
       <!-- ═══════════ SIDEBAR ═══════════ -->
       <nav class="settings-sidebar">
-        <div class="sidebar-brand">
-          <h2 class="sidebar-title">Settings</h2>
-          <p class="sidebar-subtitle">
-            Manage your application preferences and organization settings
-          </p>
-        </div>
         <ul class="sidebar-nav">
           <li
             class={generalTabClass}
@@ -44,21 +38,6 @@
               General
             </a>
           </li>
-          <li
-            class={companyInfoTabClass}
-            data-tab="CompanyInfo"
-            onclick={handleTabClick}
-          >
-            <a href="javascript:void(0);" class="nav-link">
-              <lightning-icon
-                icon-name="utility:company"
-                size="x-small"
-                class="nav-icon"
-                variant={companyInfoIconVariant}
-              ></lightning-icon>
-              Company Information
-            </a>
-          </li>
           <li class={pdfTabClass} data-tab="PDF" onclick={handleTabClick}>
             <a href="javascript:void(0);" class="nav-link">
               <lightning-icon
@@ -68,21 +47,6 @@
                 variant={pdfIconVariant}
               ></lightning-icon>
               PDF
-            </a>
-          </li>
-          <li
-            class={integrationsTabClass}
-            data-tab="Integrations"
-            onclick={handleTabClick}
-          >
-            <a href="javascript:void(0);" class="nav-link">
-              <lightning-icon
-                icon-name="utility:link"
-                size="x-small"
-                class="nav-icon"
-                variant={integrationsIconVariant}
-              ></lightning-icon>
-              Integrations
             </a>
           </li>
           <li class={teamTabClass} data-tab="Users" onclick={handleTabClick}>
@@ -221,170 +185,7 @@
           </div>
         </template>
 
-        <!-- ── COMPANY INFORMATION ── -->
-        <template if:true={isCompanyInfoTab}>
-          <div class="content-header slds-m-bottom_large">
-            <div class="slds-media slds-media_center">
-              <div class="slds-media__figure">
-                <div class="header-icon-wrap">
-                  <lightning-icon
-                    icon-name="utility:company"
-                    size="small"
-                  ></lightning-icon>
-                </div>
-              </div>
-              <div class="slds-media__body">
-                <h1 class="content-heading">Company Information</h1>
-                <p class="content-subheading">
-                  Configure your organization details and preferences.
-                </p>
-              </div>
-            </div>
-          </div>
 
-          <!-- General Info Card -->
-          <div class="card slds-m-bottom_medium">
-            <h3 class="card-section-title">General Information</h3>
-            <div class="form-row">
-              <div class="form-group full-width">
-                <label class="form-label">Company Name</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="Enter company name"
-                  value={companySettings.companyName}
-                  data-field="companyName"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Phone</label>
-                <input
-                  type="tel"
-                  class="form-input"
-                  placeholder="+1 (555) 000-0000"
-                  value={companySettings.phone}
-                  data-field="phone"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Website</label>
-                <input
-                  type="url"
-                  class="form-input"
-                  placeholder="https://yourcompany.com"
-                  value={companySettings.website}
-                  data-field="website"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Industry</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="e.g. Technology"
-                  value={companySettings.industry}
-                  data-field="industry"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Default Currency</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="e.g. USD"
-                  value={companySettings.currencyCode}
-                  data-field="currencyCode"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Address Card -->
-          <div class="card slds-m-bottom_medium">
-            <h3 class="card-section-title">Address</h3>
-            <div class="form-row">
-              <div class="form-group full-width">
-                <label class="form-label">Address Line 1</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="Street address"
-                  value={companySettings.addressLine1}
-                  data-field="addressLine1"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-            </div>
-            <div class="form-row three-col">
-              <div class="form-group">
-                <label class="form-label">City</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="City"
-                  value={companySettings.city}
-                  data-field="city"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">State / Province</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="State"
-                  value={companySettings.state}
-                  data-field="state"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Country</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="Country"
-                  value={companySettings.country}
-                  data-field="country"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Timezone</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="e.g. America/Los_Angeles"
-                  value={companySettings.timezone}
-                  data-field="timezone"
-                  onchange={handleCompanyFieldChange}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button
-              class="btn-save"
-              onclick={handleSaveCompanyInfo}
-              disabled={isSavingCompany}
-            >
-              <template if:true={isSavingCompany}>Saving...</template>
-              <template if:false={isSavingCompany}>Save Changes</template>
-            </button>
-          </div>
-        </template>
 
         <!-- ── PDF SECTION ── -->
         <template if:true={isPdfTab}>
@@ -409,31 +210,7 @@
             </div>
           </div>
 
-          <!-- Active Template Card -->
-          <div class="card slds-m-bottom_medium">
-            <div class="card-header-row">
-              <h3 class="card-section-title">Active Templates</h3>
-            </div>
-            <div class="template-card">
-              <div class="template-icon">
-                <lightning-icon
-                  icon-name="utility:pdf_ext"
-                  size="medium"
-                ></lightning-icon>
-              </div>
-              <div class="template-info">
-                <div class="template-name">Standard Quote PDF</div>
-                <div class="template-desc">
-                  Default Provus Express Quoting template. Includes line items,
-                  financials, and summary.
-                </div>
-              </div>
-              <div class="template-badges">
-                <span class="badge badge-default">Default</span>
-                <span class="badge badge-active">Active</span>
-              </div>
-            </div>
-          </div>
+
 
           <!-- PDF History -->
           <div class="card">
@@ -532,39 +309,6 @@
           </div>
         </template>
 
-        <!-- ── INTEGRATIONS TAB ── -->
-        <template if:true={isIntegrationsTab}>
-          <div class="content-header slds-m-bottom_large">
-            <div class="slds-media slds-media_center">
-              <div class="slds-media__figure">
-                <div class="header-icon-wrap">
-                  <lightning-icon
-                    icon-name="utility:link"
-                    size="small"
-                  ></lightning-icon>
-                </div>
-              </div>
-              <div class="slds-media__body">
-                <h1 class="content-heading">Integrations</h1>
-                <p class="content-subheading">
-                  Connect Provus Express Quoting with your favorite tools.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="empty-state">
-            <lightning-icon
-              icon-name="utility:link"
-              size="large"
-              class="empty-icon"
-            ></lightning-icon>
-            <p class="empty-title">Coming Soon</p>
-            <p class="empty-desc">
-              Integrations will be available in a future update.
-            </p>
-          </div>
-        </template>
 
         <!-- ── TEAM SECTION ── -->
         <template if:true={isUsersTab}>

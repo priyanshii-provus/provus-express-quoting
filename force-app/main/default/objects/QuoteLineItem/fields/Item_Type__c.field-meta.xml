@@ -12,7 +12,7 @@
             <value>
                 <fullName>Labor</fullName>
                 <default>true</default>
-                <label>Labor</label>
+                <label>Resource Role</label>
             </value>
             <value>
                 <fullName>Product</fullName>

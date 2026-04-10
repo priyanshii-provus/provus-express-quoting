@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cannot_Submit_Zero_Value</fullName>
+    <active>true</active>
+    <errorConditionFormula>ISPICKVAL(Status, &apos;Pending Approval&apos;) &amp;&amp; (TotalPrice == 0 || ISNULL(TotalPrice))</errorConditionFormula>
+    <errorMessage>Quote cannot be submitted for approval if total value is 0.</errorMessage>
+</ValidationRule>

@@ -26,7 +26,7 @@ const columns = [
     label: "Total Amount",
     fieldName: "TotalPrice",
     type: "currency",
-    typeAttributes: { currencyCode: "USD" }
+    typeAttributes: { currencyCode: "INR" }
   },
   {
     type: "action",
@@ -187,22 +187,6 @@ export default class QuoteListComponent extends NavigationMixin(
       });
   }
 
-  handleAIAssistant() {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: "AI Assistant",
-        message: "Opening pipeline analytics and conversion insights...",
-        variant: "info"
-      })
-    );
-    this.dispatchEvent(
-      new CustomEvent("navigatetotab", {
-        detail: { tab: "AI Assistant" },
-        bubbles: true,
-        composed: true
-      })
-    );
-  }
 
   handleCreateQuote() {
     this.dispatchEvent(

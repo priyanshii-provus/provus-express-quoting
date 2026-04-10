@@ -5,6 +5,10 @@ public with sharing class TeamController {
     'User'
   };
 
+  @TestVisible private static Boolean mockEmptyLicenses = false;
+  @TestVisible private static Boolean throwTestException = false;
+  @TestVisible private static Boolean mockProtectedUser = false;
+
   /**
    * Returns total, used, and available Salesforce license counts.
    */
@@ -12,6 +16,9 @@ public with sharing class TeamController {
   public static Map<String, Integer> getLicenseCounts() {
     Map<String, Integer> result = new Map<String, Integer>();
     try {
+      if (throwTestException) {
+        throw new CalloutException('Simulated test exception');
+      }
       // Find the primary Salesforce license (usually 'Salesforce' or 'Salesforce Platform')
       List<UserLicense> licenses = [
         SELECT Name, TotalLicenses, UsedLicenses
@@ -20,7 +27,7 @@ public with sharing class TeamController {
         ORDER BY UsedLicenses DESC, TotalLicenses DESC
       ];
 
-      if (!licenses.isEmpty()) {
+      if (!licenses.isEmpty() && !mockEmptyLicenses) {
         // Return the license with the most seats as the "Total Seats"
         UserLicense primary = licenses[0];
         Integer total = primary.TotalLicenses;
@@ -80,12 +87,15 @@ public with sharing class TeamController {
       LIMIT 1
     ];
     if (isProtectedUser(u)) {
-      throw new AuraHandledException(
+      AuraHandledException ex = new AuraHandledException(
         'Cannot deactivate protected system user: ' + u.Name
       );
+      ex.setMessage('Cannot deactivate protected system user: ' + u.Name);
+      throw ex;
     }
 
     try {
+      if (throwTestException) throw new DmlException('Simulated test exception');
       update new User(Id = userId, IsActive = false);
     } catch (Exception e) {
       AuraHandledException ex = new AuraHandledException(e.getMessage());
@@ -159,12 +169,15 @@ public with sharing class TeamController {
       LIMIT 1
     ];
     if (isProtectedUser(u)) {
-      throw new AuraHandledException(
+      AuraHandledException ex = new AuraHandledException(
         'Cannot modify protected system user: ' + u.Name
       );
+      ex.setMessage('Cannot modify protected system user: ' + u.Name);
+      throw ex;
     }
 
     try {
+      if (throwTestException) throw new DmlException('Simulated test exception');
       update new User(
         Id = userId,
         Express_Role__c = newRole,
@@ -220,6 +233,7 @@ public with sharing class TeamController {
         ProfileId = p.Id,
         Express_Role__c = newRole
       );
+      if (throwTestException) throw new DmlException('Simulated test exception');
       insert newUser;
       // Send password reset / setup email so user can log in
       if (!Test.isRunningTest()) {
@@ -238,6 +252,7 @@ public with sharing class TeamController {
       throw new AuraHandledException('Only Admins can resend setup emails.');
     }
     try {
+      if (throwTestException) throw new CalloutException('Simulated test exception');
       System.resetPassword(userId, true);
     } catch (Exception e) {
       AuraHandledException ex = new AuraHandledException(e.getMessage());
@@ -286,7 +301,9 @@ public with sharing class TeamController {
     return role == 'Admin' || role == 'Manager';
   }
 
+  @TestVisible
   private static Boolean isProtectedUser(User u) {
+    if (mockProtectedUser) return true;
     if (u == null)
       return false;
     String profileName = u.Profile.Name;

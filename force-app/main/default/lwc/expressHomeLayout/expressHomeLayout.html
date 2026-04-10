@@ -91,19 +91,6 @@
           ></lightning-icon>
           <span>Add-ons</span>
         </a>
-        <a
-          href="javascript:void(0);"
-          class={aiAssistantClass}
-          onclick={handleNavSelection}
-          data-target="AI Assistant"
-        >
-          <lightning-icon
-            icon-name="utility:magicwand"
-            size="x-small"
-            variant={aiAssistantVariant}
-          ></lightning-icon>
-          <span>AI Assistant</span>
-        </a>
       </div>
 
       <div class="sidebar-bottom">
@@ -118,18 +105,6 @@
             size="x-small"
           ></lightning-icon>
           <span>Feedback</span>
-        </a>
-        <a
-          href="javascript:void(0);"
-          class="nav-item"
-          onclick={handleNavSelection}
-          data-target="Take a Tour"
-        >
-          <lightning-icon
-            icon-name="utility:steps"
-            size="x-small"
-          ></lightning-icon>
-          <span>Take a Tour</span>
         </a>
         <template if:true={isAdmin}>
           <a
@@ -185,6 +160,7 @@
           onnavigatetotab={handleNavigateToTab}
         ></c-settings-component>
       </template>
+
       <template if:true={isFeedback}>
         <c-feedback-dashboard
           onnavigatetotab={handleNavigateToTab}

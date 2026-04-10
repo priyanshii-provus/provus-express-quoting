@@ -8,6 +8,7 @@ import getPricebookEntries from "@salesforce/apex/ProductController.getPricebook
 import getResourceRoles from "@salesforce/apex/ResourceRoleController.getResourceRoles";
 import getAddons from "@salesforce/apex/AddonController.getAddons";
 import getQuoteById from "@salesforce/apex/QuoteService.getQuoteById";
+import getCurrentUserRole from "@salesforce/apex/TeamController.getCurrentUserRole";
 import { refreshApex } from "@salesforce/apex";
 
 const PERIOD_HOURS = {
@@ -33,13 +34,39 @@ export default class QuoteLineItemsComponent extends LightningElement {
   @track isProductModalOpen = false;
   @track isResourceModalOpen = false;
   @track isAddonModalOpen = false;
+  @track isSimulatorModalOpen = false;
+
+  handleOpenSimulator() {
+    this.isSimulatorModalOpen = true;
+  }
+  handleCloseSimulator() {
+    this.isSimulatorModalOpen = false;
+  }
 
   // Quote State
   @track quoteTimePeriod = "Months";
   @track quoteStatus = "Draft";
+  @track userRole = "User";
 
-  get isApproved() {
-    return this.quoteStatus === "Approved";
+  @wire(getCurrentUserRole)
+  wiredUserRole({ data }) {
+    if (data) {
+      this.userRole = data;
+    }
+  }
+
+  get isManagerOrAdmin() {
+    return this.userRole === "Admin" || this.userRole === "Manager";
+  }
+
+  get isLocked() {
+    if (this.quoteStatus === "Approved" || this.quoteStatus === "Rejected") {
+      return true;
+    }
+    if (this.quoteStatus === "Pending Approval" && !this.isManagerOrAdmin) {
+      return true;
+    }
+    return false;
   }
 
   @wire(getQuoteById, { quoteId: "$recordId" })
@@ -469,7 +496,7 @@ export default class QuoteLineItemsComponent extends LightningElement {
         this.dispatchEvent(
           new ShowToastEvent({
             title: "Success",
-            message: "Resource added",
+            message: "Resource Role added",
             variant: "success"
           })
         );

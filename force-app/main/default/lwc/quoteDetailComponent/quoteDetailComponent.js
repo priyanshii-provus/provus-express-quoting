@@ -12,6 +12,7 @@ import processApprovalAction from "@salesforce/apex/QuoteApprovalController.proc
 import getApprovalHistory from "@salesforce/apex/QuoteApprovalController.getApprovalHistory";
 import getCurrentUserRole from "@salesforce/apex/TeamController.getCurrentUserRole";
 import updateQuoteFields from "@salesforce/apex/QuoteService.updateQuoteFields";
+import evaluateQuoteHealth from "@salesforce/apex/QuoteHealthAdvisor.evaluateQuoteHealth";
 import Id from "@salesforce/user/Id";
 
 export default class QuoteDetailComponent extends NavigationMixin(
@@ -30,6 +31,11 @@ export default class QuoteDetailComponent extends NavigationMixin(
   @track approvalAction = ""; // 'Submit', 'Approve', 'Reject'
   @track isApprovalSubmitting = false;
   @track currentUserRole = "User";
+
+  // Smart Margin Advisor State
+  @track healthScore = null;
+  @track isHealthLoading = false;
+  @track showHealthAdvisor = false;
 
   currentUserId = Id;
 
@@ -142,10 +148,10 @@ export default class QuoteDetailComponent extends NavigationMixin(
       : "—";
   }
   get formattedMargin() {
-    return `$${this.fmtNum(this.quote.TotalMargin)} (${this.fmtNum(this.quote.MarginPct)}%)`;
+    return `₹${this.fmtNum(this.quote.TotalMargin)} (${this.fmtNum(this.quote.MarginPct)}%)`;
   }
   get formattedDiscount() {
-    return `$${this.fmtNum(this.quote.DiscountAmount)} (${this.fmtNum(this.quote.Discount)}%)`;
+    return `₹${this.fmtNum(this.quote.DiscountAmount)} (${this.fmtNum(this.quote.Discount)}%)`;
   }
   get formattedCreatedDate() {
     return this.quote.CreatedDate
@@ -167,6 +173,19 @@ export default class QuoteDetailComponent extends NavigationMixin(
   }
   get isPendingApproval() {
     return this.quote.Status === "Pending Approval";
+  }
+  get isLocked() {
+    if (this.quote.Status === "Approved" || this.quote.Status === "Rejected") {
+      return true;
+    }
+    if (
+      this.quote.Status === "Pending Approval" &&
+      this.currentUserRole !== "Admin" &&
+      this.currentUserRole !== "Manager"
+    ) {
+      return true;
+    }
+    return false;
   }
 
   get canApproveReject() {
@@ -225,10 +244,10 @@ export default class QuoteDetailComponent extends NavigationMixin(
   }
 
   get laborCost() {
-    return this.sumField(this.laborItems, "Cost__c");
+    return this.laborItems.reduce((s, i) => s + (i.Cost__c || 0), 0);
   }
   get laborMargin() {
-    return this.sumField(this.laborItems, "Margin__c");
+    return this.quote.LaborRevenue - this.laborCost;
   }
   get laborMarginPct() {
     return this.pct(this.laborMargin, this.quote.LaborRevenue);
@@ -238,10 +257,10 @@ export default class QuoteDetailComponent extends NavigationMixin(
   }
 
   get productsCost() {
-    return this.sumField(this.productItems, "Cost__c");
+    return this.productItems.reduce((s, i) => s + (i.Cost__c || 0), 0);
   }
   get productsMargin() {
-    return this.sumField(this.productItems, "Margin__c");
+    return this.quote.ProductsRevenue - this.productsCost;
   }
   get productsMarginPct() {
     return this.pct(this.productsMargin, this.quote.ProductsRevenue);
@@ -251,10 +270,10 @@ export default class QuoteDetailComponent extends NavigationMixin(
   }
 
   get addonsCost() {
-    return this.sumField(this.addonItems, "Cost__c");
+    return this.addonItems.reduce((s, i) => s + (i.Cost__c || 0), 0);
   }
   get addonsMargin() {
-    return this.sumField(this.addonItems, "Margin__c");
+    return this.quote.AddonsRevenue - this.addonsCost;
   }
   get addonsMarginPct() {
     return this.pct(this.addonsMargin, this.quote.AddonsRevenue);
@@ -425,19 +444,40 @@ export default class QuoteDetailComponent extends NavigationMixin(
       const phase = item.Phase__c || "Default phase";
       if (!phasesMap[phase]) phasesMap[phase] = { phaseName: phase, items: [] };
 
-      // Dummy duration logic since explicit dates per item don't exist
-      let durationMonths = 3;
-      const typeLower = (item.Item_Type__c || "Product").toLowerCase();
-      if (typeLower === "labor" || typeLower === "resource role") {
-        durationMonths = 12;
-      }
-      durationMonths = Math.min(durationMonths, totalMonths);
-      let durationText = `${durationMonths} months`;
-      if (durationMonths === 12) durationText = "about 1 year";
-      if (durationMonths === 1) durationText = "1 month";
-      if (durationMonths === 0) {
-        durationMonths = 1;
-        durationText = "Under 1 month";
+      // Calculate actual duration and offset based on dates
+      let durationMonths = 1;
+      let startIndex = 0;
+      let durationText = "1 month";
+
+      if (item.Start_Date__c && item.End_Date__c && this.quote.StartDate) {
+        const itemStart = new Date(item.Start_Date__c + "T00:00:00");
+        const itemEnd = new Date(item.End_Date__c + "T00:00:00");
+        const quoteStart = new Date(this.quote.StartDate + "T00:00:00");
+
+        startIndex = (itemStart.getFullYear() - quoteStart.getFullYear()) * 12 + (itemStart.getMonth() - quoteStart.getMonth());
+        if (startIndex < 0) startIndex = 0;
+
+        durationMonths = (itemEnd.getFullYear() - itemStart.getFullYear()) * 12 + (itemEnd.getMonth() - itemStart.getMonth()) + 1;
+        
+        const maxSpan = totalMonths - startIndex;
+        if (durationMonths > maxSpan) durationMonths = maxSpan;
+        if (durationMonths <= 0) durationMonths = 1;
+
+        const diffTime = Math.abs(itemEnd - itemStart);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays <= 31) {
+            const weeks = Math.round(diffDays / 7);
+            if (weeks <= 1 && diffDays <= 7) durationText = `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+            else if (weeks > 0 && weeks < 4) durationText = `${weeks} week${weeks > 1 ? 's' : ''}`;
+            else durationText = `1 month`;
+        } else {
+            durationText = `${durationMonths} months`;
+        }
+      } else {
+        // Fallback for items missing dates
+        startIndex = 0;
+        durationMonths = Math.min(3, totalMonths);
+        durationText = `${durationMonths} months`;
       }
 
       let displayType = item.Item_Type__c || "Product";
@@ -467,7 +507,7 @@ export default class QuoteDetailComponent extends NavigationMixin(
         displayType,
         dotClass,
         pillClass,
-        pillStyle: `grid-column: 1 / span ${durationMonths};`,
+        pillStyle: `grid-column: ${startIndex + 1} / span ${durationMonths};`,
         iconName
       });
     });
@@ -746,6 +786,68 @@ export default class QuoteDetailComponent extends NavigationMixin(
     } finally {
       this.isGenerating = false;
     }
+  }
+
+  /* ───── Smart Margin Advisor ───── */
+  async handleAnalyzeHealth() {
+    this.activeTab = "line-items"; // Switch to tab where panel lives
+    this.showHealthAdvisor = true;
+    this.isHealthLoading = true;
+    try {
+      this.healthScore = await evaluateQuoteHealth({ quoteId: this.recordId });
+    } catch (error) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Error",
+          message: error.body?.message || "Failed to analyze quote health",
+          variant: "error"
+        })
+      );
+    } finally {
+      this.isHealthLoading = false;
+    }
+  }
+
+  handleCloseHealth() {
+    this.showHealthAdvisor = false;
+  }
+
+  get healthRingVariant() {
+    if (!this.healthScore) return "base";
+    if (this.healthScore.status === "Healthy") return "base-autocomplete";
+    if (this.healthScore.status === "Warning") return "warning";
+    return "expired";
+  }
+
+  get healthBadgeClass() {
+    if (!this.healthScore) return "slds-badge";
+    const base = "slds-badge ";
+    if (this.healthScore.status === "Healthy") return base + "slds-theme_success";
+    if (this.healthScore.status === "Warning") return base + "slds-theme_warning";
+    return base + "slds-theme_error";
+  }
+
+  get processedRecommendations() {
+    if (!this.healthScore || !this.healthScore.recommendations) return [];
+    return this.healthScore.recommendations.map(r => {
+      let iconVariant = "";
+      let bgColors = "";
+      if (r.severity === "success") { 
+        iconVariant = "success"; 
+        bgColors = "background-color: #f0fdf4; border-color: #bbf7d0;";
+      } else if (r.severity === "warning") { 
+        iconVariant = "warning"; 
+        bgColors = "background-color: #fffbeb; border-color: #fde68a;";
+      } else if (r.severity === "error") { 
+        iconVariant = "error"; 
+        bgColors = "background-color: #fef2f2; border-color: #fecaca;";
+      } else { 
+        bgColors = "background-color: #f3f4f6; border-color: #e5e7eb;";
+      }
+      
+      const bgStyle = `${bgColors} display: flex; align-items: flex-start; gap: 12px; border-radius: 6px; border-width: 1px; border-style: solid;`;
+      return { ...r, iconVariant, bgStyle };
+    });
   }
 
   handleViewVersion(event) {

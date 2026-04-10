@@ -1,37 +1,12 @@
 public without sharing class ProductController {
   @AuraEnabled(cacheable=true)
   public static List<Product2> getProducts(Boolean activeOnly) {
-    String query =
-      'SELECT Id, Name, ProductCode, Description, Family, IsActive, ' +
-      'CreatedDate, LastModifiedDate ' +
-      'FROM Product2';
-
-    if (activeOnly != null && activeOnly) {
-      query += ' WHERE IsActive = true AND Name != \'Resource Placeholder\'';
-    } else {
-      query += ' WHERE Name != \'Resource Placeholder\'';
-    }
-
-    query += ' ORDER BY Name ASC';
-
-    return Database.query(query);
+    return ProductSelector.getProducts(activeOnly);
   }
 
   @AuraEnabled
   public static Product2 getProductById(Id productId) {
-    return [
-      SELECT
-        Id,
-        Name,
-        ProductCode,
-        Description,
-        Family,
-        IsActive,
-        CreatedDate,
-        LastModifiedDate
-      FROM Product2
-      WHERE Id = :productId
-    ];
+    return ProductSelector.getProductById(productId);
   }
 
   @AuraEnabled
@@ -43,21 +18,7 @@ public without sharing class ProductController {
     Decimal cost,
     Decimal price
   ) {
-    Product2 product = new Product2(
-      Name = name,
-      ProductCode = productCode,
-      Description = description,
-      Family = family,
-      IsActive = true,
-      Cost__c = cost
-    );
-    insert product;
-
-    if (price != null) {
-      createPricebookEntry(product.Id, null, price);
-    }
-
-    return product;
+    return ProductService.createProduct(name, productCode, description, family, cost, price);
   }
 
   @AuraEnabled
@@ -69,59 +30,22 @@ public without sharing class ProductController {
     String family,
     Boolean isActive
   ) {
-    Product2 product = new Product2(
-      Id = productId,
-      Name = name,
-      ProductCode = productCode,
-      Description = description,
-      Family = family,
-      IsActive = isActive
-    );
-    update product;
-    return getProductById(productId);
+    return ProductService.updateProduct(productId, name, productCode, description, family, isActive);
   }
 
   @AuraEnabled
   public static void deleteProduct(Id productId) {
-    delete new Product2(Id = productId);
+    ProductService.deleteProduct(productId);
   }
 
   @AuraEnabled
   public static void updateProducts(List<Product2> products) {
-    update products;
+    ProductService.updateProducts(products);
   }
 
   @AuraEnabled(cacheable=true)
   public static List<PricebookEntry> getPricebookEntries(Id pricebookId) {
-    if (pricebookId == null) {
-      try {
-        pricebookId = [
-          SELECT Id
-          FROM Pricebook2
-          WHERE IsStandard = TRUE
-          LIMIT 1
-        ]
-        .Id;
-      } catch (Exception e) {
-        pricebookId = Test.getStandardPricebookId();
-      }
-    }
-    return [
-      SELECT
-        Id,
-        Product2Id,
-        Product2.Name,
-        Product2.ProductCode,
-        Product2.Family,
-        UnitPrice,
-        IsActive
-      FROM PricebookEntry
-      WHERE
-        Pricebook2Id = :pricebookId
-        AND IsActive = TRUE
-        AND Product2.Name != 'Resource Placeholder'
-      ORDER BY Product2.Name ASC
-    ];
+    return ProductSelector.getPricebookEntries(pricebookId);
   }
 
   @AuraEnabled
@@ -130,26 +54,11 @@ public without sharing class ProductController {
     Id pricebook2Id,
     Decimal unitPrice
   ) {
-    if (pricebook2Id == null) {
-      try {
-        pricebook2Id = [
-          SELECT Id
-          FROM Pricebook2
-          WHERE IsStandard = TRUE
-          LIMIT 1
-        ]
-        .Id;
-      } catch (Exception e) {
-        pricebook2Id = Test.getStandardPricebookId();
-      }
-    }
-    PricebookEntry pbe = new PricebookEntry(
-      Product2Id = product2Id,
-      Pricebook2Id = pricebook2Id,
-      UnitPrice = unitPrice,
-      IsActive = true
-    );
-    insert pbe;
-    return pbe;
+    return ProductService.createPricebookEntry(product2Id, pricebook2Id, unitPrice);
+  }
+
+  @AuraEnabled
+  public static Integer importProducts(List<Map<String, String>> products) {
+    return ProductService.importProducts(products);
   }
 }

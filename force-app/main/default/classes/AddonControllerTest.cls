@@ -139,4 +139,41 @@ private class AddonControllerTest {
       'Margin should be 0 when price is 0 (avoid division by zero)'
     );
   }
+
+  @isTest
+  static void testUpdateAddons() {
+    List<Add_on__c> addons = [SELECT Id, Name FROM Add_on__c];
+    for (Add_on__c a : addons) {
+      a.Description__c = 'Updated';
+    }
+    Test.startTest();
+    AddonController.updateAddons(addons);
+    Test.stopTest();
+    System.assertEquals('Updated', [SELECT Description__c FROM Add_on__c LIMIT 1].Description__c);
+  }
+
+  @isTest
+  static void testImportAddons() {
+    List<Map<String, String>> data = new List<Map<String, String>>();
+    data.add(new Map<String, String>{
+      'Name' => 'New Addon',
+      'Price' => '100',
+      'Cost' => '50',
+      'Billing_Unit' => 'Month',
+      'Description' => 'Test Import',
+      'Is_Active' => 'true'
+    });
+    data.add(new Map<String, String>{
+      'Name' => 'Empty Price',
+      'Price' => 'invalid',
+      'Cost' => '',
+      'Billing_Unit' => ''
+    });
+    Test.startTest();
+    Integer count = AddonController.importAddons(data);
+    Test.stopTest();
+    System.assertEquals(2, count);
+    System.assertEquals(100, [SELECT Price__c FROM Add_on__c WHERE Name = 'New Addon'].Price__c);
+    System.assertEquals(0, [SELECT Price__c FROM Add_on__c WHERE Name = 'Empty Price'].Price__c);
+  }
 }

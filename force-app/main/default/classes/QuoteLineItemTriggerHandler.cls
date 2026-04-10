@@ -39,9 +39,7 @@ public with sharing class QuoteLineItemTriggerHandler {
       FROM QuoteLineItem
       WHERE QuoteId IN :quoteIds
     ]) {
-      Decimal lineCost =
-        (item.Cost__c != null ? item.Cost__c : 0) *
-        (item.Quantity != null ? item.Quantity : 0);
+      Decimal lineCost = (item.Cost__c != null ? item.Cost__c : 0) * (item.Quantity != null ? item.Quantity : 1);
       Decimal lineRevenue = item.TotalPrice != null ? item.TotalPrice : 0;
 
       totalCostMap.put(item.QuoteId, totalCostMap.get(item.QuoteId) + lineCost);
@@ -116,9 +114,14 @@ public with sharing class QuoteLineItemTriggerHandler {
       );
       for (QuoteLineItem item : items) {
         if (item.QuoteId != null && quoteMap.containsKey(item.QuoteId)) {
-          if (quoteMap.get(item.QuoteId).Status == 'Approved') {
+          String status = quoteMap.get(item.QuoteId).Status;
+          if (status == 'Approved' || status == 'Rejected') {
             item.addError(
-              'You cannot add, edit, or remove line items on an approved quote.'
+              'You cannot add, edit, or remove line items on an approved or rejected quote.'
+            );
+          } else if (status == 'Pending Approval' && !TeamController.isManagerOrAdmin()) {
+            item.addError(
+              'You cannot modify line items while the quote is pending approval. Please recall it first.'
             );
           }
         }
@@ -187,14 +190,14 @@ public with sharing class QuoteLineItemTriggerHandler {
         productMap.containsKey(item.Product2Id)
       ) {
         Product2 prod = productMap.get(item.Product2Id);
-        item.Cost__c = prod.Cost__c != null ? prod.Cost__c : 0;
+        item.Cost__c = (prod.Cost__c != null ? prod.Cost__c : 0);
       } else if (
         item.Item_Type__c == 'Add-on' &&
         item.Add_on__c != null &&
         addonMap.containsKey(item.Add_on__c)
       ) {
         Add_on__c addon = addonMap.get(item.Add_on__c);
-        item.Cost__c = addon.Cost__c != null ? addon.Cost__c : 0;
+        item.Cost__c = (addon.Cost__c != null ? addon.Cost__c : 0);
         if (item.UnitPrice == null || item.UnitPrice == 0) {
           item.UnitPrice = addon.Price__c != null ? addon.Price__c : 0;
         }

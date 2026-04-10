@@ -1,94 +1,128 @@
+/* ═══════════════════════════════════════════════════
+   Dashboard Component — Provus Quoting
+   Design: Clean enterprise SaaS with warm neutrals 
+   ═══════════════════════════════════════════════════ */
+
 :host {
-  --primary-color: #0176d3;
-  --primary-light: #0b5cab;
-  --secondary-color: #1b96ff;
-  --bg-dark: #f3f4f6;
-  --card-bg: #ffffff;
-  --text-main: #080707;
-  --text-muted: #475569;
-  --success-color: #04844b;
-  --warning-color: #dd7a01;
-  --danger-color: #ea001e;
-  --border-color: #e5e7eb;
+  --brand: #475569;
+  --brand-hover: #334155;
+  --brand-soft: #f1f5f9;
+  --brand-glow: rgba(37, 99, 235, 0.08);
 
-  font-family:
-    "Inter",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  --surface-0: #ffffff;
+  --surface-1: #f8f9fb;
+  --surface-2: #f1f3f5;
+
+  --ink: #1a1a2e;
+  --ink-secondary: #5c5f6e;
+  --ink-tertiary: #9ca3af;
+
+  --border: #b3bcc7;
+  --border-strong: #8a96a3;
+
+  --amber: #f59e0b;
+  --amber-soft: #fef3c7;
+  --red: #ef4444;
+  --red-soft: #fee2e2;
+  --emerald: #10b981;
+  --emerald-soft: #d1fae5;
+  --blue: #3b82f6;
+  --blue-soft: #dbeafe;
+  --violet: #8b5cf6;
+  --violet-soft: #ede9fe;
+
   display: block;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  color: var(--ink);
+  font-weight: 500;
+  --lwc-fontWeightRegular: 500;
+  --lwc-colorTextDefault: #000000;
 }
 
+/* ───── Outer wrapper ───── */
 .premium-card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-  margin: 1rem 0;
-  color: var(--text-main);
+  margin: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
 }
 
+/* ───── Hero greeting ───── */
 .premium-header {
-  background: #f8fafc;
-  border-bottom: 1px solid var(--border-color);
-  padding: 1.5rem 2rem;
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--border);
+  padding: 1.75rem 2rem;
 }
 
-.premium-header-content {
+.greeting-box {
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-
-.premium-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text-main);
 }
 
 .premium-header-icon {
-  --sds-c-icon-color-foreground-default: var(--secondary-color);
-  background: rgba(1, 118, 211, 0.1);
+  background: var(--brand);
   border-radius: 8px;
   padding: 0.5rem;
-  border: 1px solid var(--border-color);
+}
+.premium-header-icon lightning-icon {
+  --sds-c-icon-color-foreground-default: #ffffff;
 }
 
+.emoji-icon {
+  font-size: 2.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  user-select: none;
+}
+
+.greeting-text h1 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.greeting-text p {
+  font-size: 0.8125rem;
+  color: var(--ink-secondary);
+  margin: 0.125rem 0 0 0;
+  font-weight: 400;
+}
+
+/* ───── Content body ───── */
 .premium-content {
-  background: var(--bg-dark);
-  padding: 2rem;
+  background: var(--surface-1);
+  padding: 1.75rem 2rem 2rem;
 }
 
+/* ───── Insights grid ───── */
 .dashboard-insights-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 2.5rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.875rem;
+  margin-bottom: 2rem;
 }
 
+/* ───── Insight cards ───── */
 .insight-card {
+  background: var(--surface-0);
   border-radius: 12px;
-  padding: 1.5rem;
-  background: var(--card-bg);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-top: 4px solid var(--border);
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem 1rem;
   text-align: center;
-  border: 1px solid var(--border-color);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-  border-top: 4px solid var(--border-color);
-  color: var(--text-main);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -100,167 +134,126 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-/* Insight Card Gradients for top border or faint background */
-.insight-card.awaiting {
-  border-top-color: var(--warning-color);
-  background: linear-gradient(
-    180deg,
-    rgba(245, 158, 11, 0.1) 0%,
-    var(--card-bg) 100%
-  );
-}
-
-.insight-card.low-margin {
-  border-top-color: var(--danger-color);
-  background: linear-gradient(
-    180deg,
-    rgba(239, 68, 68, 0.1) 0%,
-    var(--card-bg) 100%
-  );
-}
-
-.insight-card.draft {
-  border-top-color: var(--secondary-color);
-  background: linear-gradient(
-    180deg,
-    rgba(56, 189, 248, 0.1) 0%,
-    var(--card-bg) 100%
-  );
-}
-
-.insight-card.high-margin {
-  border-top-color: var(--success-color);
-  background: linear-gradient(
-    180deg,
-    rgba(16, 185, 129, 0.1) 0%,
-    var(--card-bg) 100%
-  );
-}
-
-.insight-card.won {
-  border-top-color: var(--primary-light);
-  background: linear-gradient(
-    180deg,
-    rgba(129, 140, 248, 0.1) 0%,
-    var(--card-bg) 100%
-  );
-}
-
-.insight-card h3 {
+.insight-large-num {
   font-size: 2.5rem;
   font-weight: 700;
+  color: var(--ink);
   margin-bottom: 0.5rem;
-  color: var(--text-main);
+  line-height: 1;
 }
 
-.insight-card .slds-text-title {
-  color: var(--text-main);
-  font-weight: 600;
-}
-
-.insight-card .slds-text-body_small {
-  color: var(--text-muted);
-  margin-top: 0.5rem;
+.insight-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
   margin-bottom: 1rem;
 }
 
-.datatable-container {
-  background: #ffffff;
-  --lwc-colorTextDefault: #000000;
-  border-radius: 8px;
-  padding: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
-  overflow: auto;
+.insight-subtitle {
+  font-size: 0.75rem;
+  color: var(--ink-secondary);
+  line-height: 1.4;
+  margin-bottom: 1rem;
 }
 
-/* Modals dark theme styling */
-.dark-modal .slds-modal__container {
-  --sds-c-modal-color-background: var(--card-bg);
-  --sds-c-modal-text-color: var(--text-main);
-  --lwc-formLabelTextColor: var(--text-muted);
-  --lwc-colorTextLabel: var(--text-muted);
-  border-radius: 12px;
+/* Variant top-borders + gradient backgrounds */
+.insight-card.awaiting {
+  border-top-color: var(--amber);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.1) 0%, var(--surface-0) 100%);
 }
-.dark-modal .slds-modal__header {
-  background-color: var(--card-bg);
-  border-bottom: 1px solid var(--border-color);
-  color: var(--text-main);
-  border-radius: 12px 12px 0 0;
+.insight-card.low-margin {
+  border-top-color: var(--red);
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.1) 0%, var(--surface-0) 100%);
 }
-.dark-modal .slds-modal__title {
-  font-weight: 700;
+.insight-card.draft {
+  border-top-color: var(--blue);
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.1) 0%, var(--surface-0) 100%);
 }
-.dark-modal .slds-modal__content {
-  background-color: var(--card-bg);
-  color: var(--text-main);
+.insight-card.high-margin {
+  border-top-color: var(--emerald);
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, var(--surface-0) 100%);
 }
-.dark-modal .slds-modal__footer {
-  background-color: var(--card-bg);
-  border-top: 1px solid var(--border-color);
-  border-radius: 0 0 12px 12px;
-}
-.dark-modal lightning-input-field {
-  --sds-c-input-color-background: #ffffff;
-  --sds-c-input-text-color: #0f172a;
-  --sds-c-input-color-border: var(--border-color);
+.insight-card.won {
+  border-top-color: var(--violet);
+  background: linear-gradient(180deg, rgba(129, 140, 248, 0.1) 0%, var(--surface-0) 100%);
 }
 
-.custom-form .custom-field {
-  margin-bottom: 1.25rem;
-}
-
-.custom-form label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted) !important;
-  margin-bottom: 0.35rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.custom-form .required {
-  color: var(--danger-color);
-  margin-right: 0.15rem;
-  font-size: 0.85rem;
-}
-
+/* ───── Recent Quotes section ───── */
 h3.slds-text-heading_medium {
-  color: var(--text-main);
-  font-weight: 600;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ink);
 }
 
-/* ── Custom Create Quote Button ── */
+.datatable-container {
+  background: var(--surface-0);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.datatable-container lightning-datatable {
+  --lwc-colorTextDefault: var(--ink);
+  --lwc-colorBorderSeparator: var(--border);
+}
+
+/* ───── Create Quote button ───── */
 .create-quote-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   padding: 0.5rem 1rem;
-  background: var(--primary-color, #0176d3);
-  color: #ffffff;
+  background: var(--brand);
+  color: #fff;
   border: none;
   border-radius: 8px;
+  font-size: 0.8125rem;
   font-weight: 600;
-  font-size: 0.85rem;
   cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    transform 0.1s ease;
-  text-decoration: none;
+  transition: background 0.15s ease;
 }
 
 .create-quote-btn:hover {
-  background-color: var(--primary-light, #0b5cab);
-  transform: translateY(-1px);
-}
-
-.create-quote-btn:active {
-  transform: translateY(0);
+  background: var(--brand-hover);
 }
 
 .create-quote-btn lightning-icon {
   --sds-c-icon-color-foreground-default: #ffffff;
-  flex-shrink: 0;
+}
+
+/* ───── Modal overrides ───── */
+.dark-modal .slds-modal__container {
+  border-radius: 12px;
+  overflow: hidden;
+}
+.dark-modal .slds-modal__header {
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+}
+.dark-modal .slds-modal__title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.dark-modal .slds-modal__content {
+  background: var(--surface-0);
+  padding: 1.5rem;
+}
+
+.custom-form .custom-field {
+  margin-bottom: 1rem;
+}
+.custom-form label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.custom-form .required {
+  color: var(--red);
+  margin-right: 0.125rem;
 }

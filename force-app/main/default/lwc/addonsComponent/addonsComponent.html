@@ -1,35 +1,38 @@
 <template>
   <div class="addons-container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="header-info">
-        <h1>Add-ons</h1>
-        <p>Manage supplementary services and products to enhance your quotes</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-ai-assistant" onclick={handleAIAssistant}>
+    <div class="premium-header">
+      <div class="premium-header-content">
+        <div class="greeting-box">
           <lightning-icon
-            icon-name="utility:magicwand"
-            size="x-small"
-            variant="inverse"
-            class="slds-m-right_x-small"
+            icon-name="standard:service_resource"
+            size="medium"
+            class="premium-header-icon"
           ></lightning-icon>
-          AI Assistant
-        </button>
+          <div class="greeting-text">
+            <h1>Add-ons</h1>
+            <p>Manage supplementary services and products to enhance your quotes</p>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Main Content Card -->
     <div class="premium-card">
       <div class="card-title-row">
-        <h2>Add-on Catalog</h2>
-        <lightning-button
-          data-id="newButton"
-          label="New Add-on"
-          variant="brand"
-          onclick={handleNewAddon}
-          icon-name="utility:add"
-        ></lightning-button>
+        <div class="card-heading">
+          <h2>Add-on Catalog</h2>
+          <span class="badge">{addons.length} Add-ons</span>
+        </div>
+        <div class="card-actions">
+          <button class="import-btn" onclick={handleOpenImportModal}>
+            <lightning-icon icon-name="utility:upload" size="xx-small"></lightning-icon>
+            <span>Import CSV</span>
+          </button>
+          <button class="new-addon-btn" onclick={handleNewAddon}>
+            <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+            <span>New Add-on</span>
+          </button>
+        </div>
       </div>
 
       <!-- Datatable -->
@@ -50,88 +53,102 @@
 
   <!-- New Add-on Modal -->
   <template if:true={isModalOpen}>
-    <section
-      role="dialog"
-      tabindex="-1"
-      aria-labelledby="addon-modal-heading"
-      aria-modal="true"
-      class="slds-modal slds-fade-in-open slds-modal_small"
-    >
+    <section role="dialog" tabindex="-1" aria-labelledby="addon-modal-heading" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_small">
       <div class="slds-modal__container">
         <header class="slds-modal__header">
-          <button
-            class="slds-button slds-button_icon slds-modal__close"
-            title="Close"
-            onclick={closeModal}
-          >
-            <lightning-icon
-              icon-name="utility:close"
-              alternative-text="close"
-              size="small"
-            ></lightning-icon>
+          <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeModal}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" size="small"></lightning-icon>
           </button>
-          <h2 id="addon-modal-heading" class="slds-modal__title slds-hyphenate">
-            New Add-on
-          </h2>
+          <h2 id="addon-modal-heading" class="slds-modal__title slds-hyphenate">New Add-on</h2>
         </header>
-        <div
-          class="slds-modal__content slds-p-around_medium"
-          id="addon-modal-content"
-        >
-          <lightning-input
-            label="Add-on Name"
-            required
-            data-field="name"
-            value={newAddon.name}
-            onchange={handleModalFieldChange}
-          ></lightning-input>
-          <lightning-input
-            label="Price"
-            type="number"
-            formatter="currency"
-            step="0.01"
-            data-field="price"
-            value={newAddon.price}
-            onchange={handleModalFieldChange}
-            class="slds-m-top_small"
-          ></lightning-input>
-          <lightning-input
-            label="Cost"
-            type="number"
-            formatter="currency"
-            step="0.01"
-            data-field="cost"
-            value={newAddon.cost}
-            onchange={handleModalFieldChange}
-            class="slds-m-top_small"
-          ></lightning-input>
-          <lightning-combobox
-            label="Billing Unit"
-            value={newAddon.billingUnit}
-            options={billingUnitOptions}
-            onchange={handleModalBillingChange}
-            class="slds-m-top_small"
-          ></lightning-combobox>
-          <lightning-textarea
-            label="Description"
-            data-field="description"
-            value={newAddon.description}
-            onchange={handleModalFieldChange}
-            class="slds-m-top_small"
-          ></lightning-textarea>
+        <div class="slds-modal__content slds-p-around_medium" id="addon-modal-content">
+          <lightning-input label="Add-on Name" required data-field="name" value={newAddon.name} onchange={handleModalFieldChange}></lightning-input>
+          <lightning-input label="Price" type="number" formatter="currency" currency-code="INR" step="0.01" data-field="price" value={newAddon.price} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-input>
+          <lightning-input label="Cost" type="number" formatter="currency" currency-code="INR" step="0.01" data-field="cost" value={newAddon.cost} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-input>
+          <lightning-combobox label="Billing Unit" value={newAddon.billingUnit} options={billingUnitOptions} onchange={handleModalBillingChange} class="slds-m-top_small"></lightning-combobox>
+          <lightning-textarea label="Description" data-field="description" value={newAddon.description} onchange={handleModalFieldChange} class="slds-m-top_small"></lightning-textarea>
         </div>
         <footer class="slds-modal__footer">
-          <lightning-button
-            label="Cancel"
-            onclick={closeModal}
-          ></lightning-button>
-          <lightning-button
-            data-id="saveButton"
-            variant="brand"
-            label="Save"
-            onclick={handleSaveNewAddon}
-            class="slds-m-left_x-small"
-          ></lightning-button>
+          <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+          <lightning-button data-id="saveButton" variant="brand" label="Save" onclick={handleSaveNewAddon} class="slds-m-left_x-small"></lightning-button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+  </template>
+
+  <!-- Import CSV Modal -->
+  <template if:true={isImportModalOpen}>
+    <section role="dialog" tabindex="-1" aria-labelledby="import-addon-heading" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_medium">
+      <div class="slds-modal__container import-modal-container">
+        <header class="slds-modal__header import-modal-header">
+          <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeImportModal}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" size="small"></lightning-icon>
+          </button>
+          <h2 id="import-addon-heading" class="slds-modal__title slds-hyphenate">Import Add-ons</h2>
+          <p class="import-modal-subtitle">Upload a CSV file with the columns shown below. Required fields are marked with *.</p>
+        </header>
+        <div class="slds-modal__content slds-p-around_medium">
+          <h3 class="import-section-title">Expected Format</h3>
+          <div class="import-format-table-wrap">
+            <table class="import-format-table">
+              <thead>
+                <tr>
+                  <th>Name*</th>
+                  <th>Description</th>
+                  <th>Price*</th>
+                  <th>Cost</th>
+                  <th>Billing_Unit</th>
+                  <th>Is_Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Project Management</td>
+                  <td>PM services</td>
+                  <td>125</td>
+                  <td>100</td>
+                  <td>Hour</td>
+                  <td>true</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="import-format-hint">Valid billing units: Hour, Each | Is_Active should be true or false</p>
+
+          <h3 class="import-section-title slds-m-top_medium">File Upload</h3>
+          <div class={dropzoneClass} ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop} onclick={handleDropzoneClick}>
+            <template if:false={importFileName}>
+              <lightning-icon icon-name="utility:upload" size="small" class="dropzone-icon"></lightning-icon>
+              <p class="dropzone-title">Upload CSV file</p>
+              <p class="dropzone-hint">Drag & drop or click to browse (max. 5MB)</p>
+            </template>
+            <template if:true={importFileName}>
+              <lightning-icon icon-name="doctype:csv" size="small" class="dropzone-icon-file"></lightning-icon>
+              <p class="dropzone-title">{importFileName}</p>
+              <p class="dropzone-hint">{importRowCount} rows detected</p>
+            </template>
+            <input type="file" accept=".csv" class="file-input-hidden" onchange={handleFileChange} />
+          </div>
+
+          <template if:true={importError}>
+            <div class="import-error-box">
+              <lightning-icon icon-name="utility:error" size="x-small" variant="error"></lightning-icon>
+              <span>{importError}</span>
+            </div>
+          </template>
+        </div>
+        <footer class="slds-modal__footer import-modal-footer">
+          <div class="import-footer-left">
+            <button class="btn-download-template" onclick={handleDownloadTemplate}>
+              <lightning-icon icon-name="utility:download" size="xx-small"></lightning-icon>
+              <span>Download Template</span>
+            </button>
+          </div>
+          <div class="import-footer-right">
+            <lightning-button label="Cancel" onclick={closeImportModal}></lightning-button>
+            <lightning-button variant="brand" label={importButtonLabel} onclick={handleImportCsv} disabled={isImportDisabled} class="slds-m-left_x-small"></lightning-button>
+          </div>
         </footer>
       </div>
     </section>

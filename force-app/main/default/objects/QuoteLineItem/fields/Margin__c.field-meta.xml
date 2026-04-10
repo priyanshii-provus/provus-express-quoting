@@ -3,8 +3,7 @@
     <fullName>Margin__c</fullName>
     <description
   >Line item margin: (UnitPrice * Quantity * (1 - Discount/100)) - (Cost__c * Quantity)</description>
-    <formula
-  >(UnitPrice * Quantity * (1 - (BLANKVALUE(Discount, 0) / 100))) - (Cost__c * Quantity)</formula>
+    <formula>(UnitPrice * Quantity) - Cost__c</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Margin</label>
     <precision>18</precision>

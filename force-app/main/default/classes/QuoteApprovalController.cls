@@ -1,4 +1,5 @@
-public with sharing class QuoteApprovalController {
+public without sharing class QuoteApprovalController {
+
   @AuraEnabled
   public static void submitForApproval(Id quoteId, String comment) {
     try {
@@ -8,7 +9,6 @@ public with sharing class QuoteApprovalController {
 
       // Submit the approval request
       Approval.ProcessResult result = Approval.process(req);
-
       if (!result.isSuccess()) {
         throw new AuraHandledException(
           'Failed to submit for approval: ' + result.getErrors()[0].getMessage()
@@ -77,7 +77,6 @@ public with sharing class QuoteApprovalController {
       req.setWorkitemId(workItems[0].Id);
 
       Approval.ProcessResult result = Approval.process(req);
-
       if (!result.isSuccess()) {
         throw new AuraHandledException(
           'Failed to ' +
@@ -113,6 +112,7 @@ public with sharing class QuoteApprovalController {
     // But for simplicity in this CPQ app, we reset the status and let the user re-submit.
     update new Quote(Id = quoteId, Status = 'Draft');
   }
+
 
   @AuraEnabled(cacheable=true)
   public static List<ApprovalStep> getApprovalHistory(Id quoteId) {

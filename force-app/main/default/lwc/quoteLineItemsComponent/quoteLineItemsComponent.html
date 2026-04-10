@@ -11,7 +11,7 @@
         <h1>Quote Line Items</h1>
       </div>
       <div class="header-actions">
-        <template if:false={isApproved}>
+        <template if:false={isLocked}>
           <lightning-button
             label="Collapse All"
             icon-name="utility:chevrondown"
@@ -22,6 +22,12 @@
             label="Add Phase"
             icon-name="utility:add"
             onclick={handleAddPhase}
+            class="slds-m-right_small"
+          ></lightning-button>
+          <lightning-button
+            label="Profit Simulator"
+            icon-name="utility:metrics"
+            onclick={handleOpenSimulator}
             class="slds-m-right_small"
           ></lightning-button>
           <lightning-button
@@ -74,7 +80,7 @@
                 </template>
               </div>
               <span class="phase-name">{group.phase}</span>
-              <template if:false={isApproved}>
+              <template if:false={isLocked}>
                 <button
                   class="add-item-link"
                   onclick={handleAddItemToPhase}
@@ -101,7 +107,7 @@
                   <div class="td-cell td-start">{item.formattedStartDate}</div>
                   <div class="td-cell td-end">{item.formattedEndDate}</div>
                   <div class="td-cell td-qty">
-                    <template if:false={isApproved}>
+                    <template if:false={isLocked}>
                       <div class="input-with-label">
                         <input
                           type="number"
@@ -116,12 +122,12 @@
                         <span class="field-unit">{item.quantityLabel}</span>
                       </div>
                     </template>
-                    <template if:true={isApproved}>
+                    <template if:true={isLocked}>
                       {item.displayQuantity} {item.quantityLabel}
                     </template>
                   </div>
                   <div class="td-cell td-baserate">
-                    <template if:false={isApproved}>
+                    <template if:false={isLocked}>
                       <input
                         type="number"
                         class="inline-input"
@@ -133,11 +139,11 @@
                         min="0"
                       />
                     </template>
-                    <template if:true={isApproved}>
+                    <template if:true={isLocked}>
                       <lightning-formatted-number
                         value={item.BaseRateDisplay}
                         format-style="currency"
-                        currency-code="USD"
+                        currency-code="INR"
                       ></lightning-formatted-number>
                     </template>
                   </div>
@@ -149,7 +155,7 @@
                       <lightning-formatted-number
                         value={item.UnitPrice}
                         format-style="currency"
-                        currency-code="USD"
+                        currency-code="INR"
                       ></lightning-formatted-number>
                       <template if:true={item.isResource}>
                         <span class="field-unit">{item.unitPriceLabel}</span>
@@ -157,7 +163,7 @@
                     </div>
                   </div>
                   <div class="td-cell td-discount">
-                    <template if:false={isApproved}>
+                    <template if:false={isLocked}>
                       <input
                         type="number"
                         class="inline-input"
@@ -170,7 +176,7 @@
                         max="100"
                       />
                     </template>
-                    <template if:true={isApproved}>
+                    <template if:true={isLocked}>
                       {item.displayDiscount}
                     </template>
                   </div>
@@ -178,11 +184,11 @@
                     <lightning-formatted-number
                       value={item.TotalPrice}
                       format-style="currency"
-                      currency-code="USD"
+                      currency-code="INR"
                     ></lightning-formatted-number>
                   </div>
                   <div class="td-cell td-actions">
-                    <template if:false={isApproved}>
+                    <template if:false={isLocked}>
                       <lightning-button-icon
                         icon-name="utility:delete"
                         alternative-text="Delete"
@@ -207,7 +213,7 @@
             <lightning-formatted-number
               value={grandTotal}
               format-style="currency"
-              currency-code="USD"
+              currency-code="INR"
             ></lightning-formatted-number>
           </div>
         </div>
@@ -295,21 +301,21 @@
               <div class="item-type-grid">
                 <button class="item-type-card" onclick={handlePickProduct}>
                   <lightning-icon
-                    icon-name="utility:product_required"
+                    icon-name="standard:product"
                     size="medium"
                   ></lightning-icon>
                   <span>Product</span>
                 </button>
                 <button class="item-type-card" onclick={handlePickResource}>
                   <lightning-icon
-                    icon-name="utility:user"
+                    icon-name="standard:user"
                     size="medium"
                   ></lightning-icon>
                   <span>Resource</span>
                 </button>
                 <button class="item-type-card" onclick={handlePickAddon}>
                   <lightning-icon
-                    icon-name="utility:package"
+                    icon-name="standard:orders"
                     size="medium"
                   ></lightning-icon>
                   <span>Add-on</span>
@@ -371,7 +377,7 @@
                   variant="label-hidden"
                   type="number"
                   formatter="currency"
-                  currency-code="USD"
+                  currency-code="INR"
                   step="0.01"
                   value={productUnitPrice}
                   read-only
@@ -446,7 +452,7 @@
                   variant="label-hidden"
                   type="number"
                   formatter="currency"
-                  currency-code="USD"
+                  currency-code="INR"
                   step="0.01"
                   value={resourceUnitPrice}
                   read-only
@@ -520,7 +526,7 @@
                   variant="label-hidden"
                   type="number"
                   formatter="currency"
-                  currency-code="USD"
+                  currency-code="INR"
                   step="0.01"
                   value={addonUnitPrice}
                   read-only
@@ -537,6 +543,50 @@
                 label="Save"
                 onclick={handleSaveAddon}
                 class="slds-m-left_x-small"
+              ></lightning-button>
+            </footer>
+          </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+
+      <!-- SIMULATOR MODAL -->
+      <template if:true={isSimulatorModalOpen}>
+        <section
+          role="dialog"
+          tabindex="-1"
+          class="slds-modal slds-fade-in-open slds-modal_large"
+        >
+          <div class="slds-modal__container">
+            <header class="slds-modal__header">
+              <button
+                class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                title="Close"
+                onclick={handleCloseSimulator}
+              >
+                <lightning-icon
+                  icon-name="utility:close"
+                  alternative-text="close"
+                  variant="inverse"
+                  size="small"
+                ></lightning-icon>
+                <span class="slds-assistive-text">Close</span>
+              </button>
+              <h2 class="slds-text-heading_medium slds-hyphenate">
+                Margin Simulator
+              </h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <c-profit-simulator
+                        record-id={recordId}
+                    ></c-profit-simulator>
+                </div>
+            </div>
+            <footer class="slds-modal__footer">
+              <lightning-button
+                label="Close"
+                onclick={handleCloseSimulator}
               ></lightning-button>
             </footer>
           </div>

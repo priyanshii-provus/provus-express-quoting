@@ -1,9 +1,20 @@
 <template>
   <div class="feedback-container">
-    <!-- Dashboard Header -->
-    <div class="header">
-      <h1>User Feedback Wall</h1>
-      <p>What our team is saying about Provus Express Quoting</p>
+    <!-- Premium Header -->
+    <div class="premium-header">
+      <div class="premium-header-content">
+        <div class="greeting-box">
+          <lightning-icon
+            icon-name="standard:feedback"
+            size="medium"
+            class="premium-header-icon"
+          ></lightning-icon>
+          <div class="greeting-text">
+            <h1>User Feedback Wall</h1>
+            <p>What our team is saying about Provus Express Quoting</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Feedback Grid -->
@@ -11,12 +22,15 @@
       <template for:each={feedbacks} for:item="fb">
         <div key={fb.Id} class="feedback-card">
           <div class="card-content">
-            <p class="feedback-text">{fb.Feedback_Text__c}</p>
+            <p class="feedback-text">"{fb.Feedback_Text__c}"</p>
           </div>
           <div class="card-footer">
             <div class="author-box">
-              <span class="user-name">{fb.User_Name__c}</span>
-              <span class="date">{fb.formattedDate}</span>
+              <lightning-icon icon-name="standard:avatar" size="small" class="avatar-icon"></lightning-icon>
+              <div class="author-details">
+                <span class="user-name">{fb.User_Name__c}</span>
+                <span class="date">{fb.formattedDate}</span>
+              </div>
             </div>
             <button
               class="delete-btn"
@@ -39,7 +53,7 @@
       <template if:false={isBoxOpen}>
         <button class="fab" onclick={toggleBox} aria-label="Write Feedback">
           <lightning-icon
-            icon-name="utility:record_create"
+            icon-name="utility:edit"
             size="small"
             variant="inverse"
           ></lightning-icon>
@@ -49,21 +63,24 @@
 
       <template if:true={isBoxOpen}>
         <div
-          class="writing-box slds-popover slds-popover_panel slds-nubbin_top-left"
+          class="writing-box slds-popover slds-popover_panel slds-nubbin_bottom-right"
         >
           <div class="writing-box-header">
             <h2>New Feedback</h2>
-            <button class="close-btn" onclick={toggleBox}>&times;</button>
+            <button class="close-btn" onclick={toggleBox}>
+              <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+            </button>
           </div>
           <div class="writing-box-body">
-            <p class="author-info">
-              Posting as: <strong>{currentUserName}</strong>
-            </p>
+            <div class="author-info">
+              <lightning-icon icon-name="standard:avatar" size="small" class="avatar-icon"></lightning-icon>
+              <span>Posting as <strong>{currentUserName}</strong></span>
+            </div>
             <lightning-textarea
               class="feedback-textarea"
               label="Your Feedback"
               variant="label-hidden"
-              placeholder="Write your feedback here..."
+              placeholder="What's on your mind?"
               value={newFeedbackText}
               onchange={handleTextChange}
             ></lightning-textarea>
@@ -75,7 +92,7 @@
               disabled={isSubmitDisabled}
               onclick={handleSubmit}
             >
-              Submit
+              Post Feedback
             </button>
           </div>
         </div>

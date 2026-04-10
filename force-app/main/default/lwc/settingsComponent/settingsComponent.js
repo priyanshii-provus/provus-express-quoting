@@ -5,9 +5,10 @@ import updateUserDetails from "@salesforce/apex/TeamController.updateUserDetails
 import createUserDetails from "@salesforce/apex/TeamController.createUserDetails";
 import deactivateUser from "@salesforce/apex/TeamController.deactivateUser";
 import resendSetupEmail from "@salesforce/apex/TeamController.resendSetupEmail";
-import getCompanySettings from "@salesforce/apex/AdminSettingsController.getCompanySettings";
-import saveCompanySettings from "@salesforce/apex/AdminSettingsController.saveCompanySettings";
+
 import getAllPDFVersions from "@salesforce/apex/AdminSettingsController.getAllPDFVersions";
+import getCompanySettings from "@salesforce/apex/AdminSettingsController.getCompanySettings";
+
 import deletePDFVersion from "@salesforce/apex/QuotePDFController.deletePDFVersion";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { refreshApex } from "@salesforce/apex";
@@ -60,10 +61,8 @@ function getInitials(firstName, lastName) {
 
 export default class SettingsComponent extends LightningElement {
   @track activeTab = "General";
-
-  // Company Info
   @track companySettings = {};
-  @track isSavingCompany = false;
+  @track isSettingsLoading = false;
 
   // PDF
   @track pdfVersions = [];
@@ -101,13 +100,23 @@ export default class SettingsComponent extends LightningElement {
   }
 
   async loadCompanySettings() {
+    this.isSettingsLoading = true;
     try {
       const r = await getCompanySettings();
       this.companySettings = r || {};
     } catch (e) {
-      console.error("Company settings error", e);
+      console.error("Settings load error", e);
+    } finally {
+      this.isSettingsLoading = false;
     }
   }
+
+  handleSettingsChange(event) {
+    const field = event.target.dataset.field;
+    const value = event.target.value;
+    this.companySettings = { ...this.companySettings, [field]: value };
+  }
+
 
   async loadPdfVersions() {
     this.isPdfLoading = true;
@@ -192,41 +201,28 @@ export default class SettingsComponent extends LightningElement {
   get isGeneralTab() {
     return this.activeTab === "General";
   }
-  get isCompanyInfoTab() {
-    return this.activeTab === "CompanyInfo";
-  }
+
   get isPdfTab() {
     return this.activeTab === "PDF";
-  }
-  get isIntegrationsTab() {
-    return this.activeTab === "Integrations";
   }
   get isUsersTab() {
     return this.activeTab === "Users";
   }
 
-  get generalTabClass() {
-    return `sidebar-item${this.activeTab === "General" ? " active" : ""}`;
+  get generalMenuClass() {
+    return `sidebar-item ${this.activeTab === "General" ? "active" : ""}`;
   }
-  get companyInfoTabClass() {
-    return `sidebar-item${this.activeTab === "CompanyInfo" ? " active" : ""}`;
+  get pdfMenuClass() {
+    return `sidebar-item ${this.activeTab === "PDF" ? "active" : ""}`;
   }
-  get pdfTabClass() {
-    return `sidebar-item${this.activeTab === "PDF" ? " active" : ""}`;
-  }
-  get integrationsTabClass() {
-    return `sidebar-item${this.activeTab === "Integrations" ? " active" : ""}`;
-  }
-  get teamTabClass() {
-    return `sidebar-item${this.activeTab === "Users" ? " active" : ""}`;
+  get usersMenuClass() {
+    return `sidebar-item ${this.activeTab === "Users" ? "active" : ""}`;
   }
 
   get generalIconVariant() {
     return this.activeTab === "General" ? "brand" : "";
   }
-  get companyInfoIconVariant() {
-    return this.activeTab === "CompanyInfo" ? "brand" : "";
-  }
+
   get pdfIconVariant() {
     return this.activeTab === "PDF" ? "brand" : "";
   }
@@ -280,49 +276,7 @@ export default class SettingsComponent extends LightningElement {
     return `role-option${this.isRoleUser ? " selected" : ""}`;
   }
 
-  // ── Company Info Handlers ──────────────
-  handleCompanyFieldChange(event) {
-    const field = event.target.dataset.field;
-    this.companySettings = {
-      ...this.companySettings,
-      [field]: event.target.value
-    };
-  }
 
-  async handleSaveCompanyInfo() {
-    this.isSavingCompany = true;
-    try {
-      await saveCompanySettings({
-        companyName: this.companySettings.companyName || "",
-        phone: this.companySettings.phone || "",
-        website: this.companySettings.website || "",
-        industry: this.companySettings.industry || "",
-        addressLine1: this.companySettings.addressLine1 || "",
-        city: this.companySettings.city || "",
-        state: this.companySettings.state || "",
-        country: this.companySettings.country || "",
-        timezone: this.companySettings.timezone || "",
-        currencyCode: this.companySettings.currencyCode || ""
-      });
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Saved",
-          message: "Company settings updated.",
-          variant: "success"
-        })
-      );
-    } catch (e) {
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Error",
-          message: e.body?.message || e.message,
-          variant: "error"
-        })
-      );
-    } finally {
-      this.isSavingCompany = false;
-    }
-  }
 
   // ── Team Member Handlers ───────────────
   handleAddMember() {
@@ -528,23 +482,5 @@ export default class SettingsComponent extends LightningElement {
         })
       );
     }
-  }
-
-  handleAIAssistant() {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: "AI Assistant",
-        message:
-          "Preparing organizational health report and settings optimization tips...",
-        variant: "info"
-      })
-    );
-    this.dispatchEvent(
-      new CustomEvent("navigatetotab", {
-        detail: { tab: "AI Assistant" },
-        bubbles: true,
-        composed: true
-      })
-    );
   }
 }

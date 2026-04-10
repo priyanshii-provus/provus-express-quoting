@@ -96,10 +96,9 @@
 }
 
 .nav-item.active lightning-icon {
-  --sds-c-icon-color-foreground-default: #ffffff;
-  --sds-c-icon-color-foreground: #ffffff;
-  --lwc-colorTextIconDefault: #ffffff;
-  color: #ffffff;
+  --sds-c-icon-color-foreground-default: #ffffff !important;
+  --lwc-colorTextIconDefault: #ffffff !important;
+  color: #ffffff !important;
 }
 
 /* ── Create Quote Button ───────────── */

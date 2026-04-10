@@ -161,4 +161,38 @@ private class ResourceRoleControllerTest {
     Test.stopTest();
     System.assertEquals(0, margin, 'Margin should be 0 when price is 0');
   }
+
+  @isTest
+  static void testUpdateResourceRoles() {
+    List<Resource_Role__c> roles = [SELECT Id FROM Resource_Role__c];
+    for (Resource_Role__c r : roles) {
+      r.Location__c = 'Global';
+    }
+    Test.startTest();
+    ResourceRoleController.updateResourceRoles(roles);
+    Test.stopTest();
+    System.assertEquals('Global', [SELECT Location__c FROM Resource_Role__c LIMIT 1].Location__c);
+  }
+
+  @isTest
+  static void testImportResourceRoles() {
+    List<Map<String, String>> data = new List<Map<String, String>>();
+    data.add(new Map<String, String>{
+      'Name' => 'Imported Role',
+      'Price' => '150',
+      'Cost' => '100',
+      'Location' => 'London',
+      'Billing_Unit' => 'Day'
+    });
+    data.add(new Map<String, String>{
+      'Name' => '', // Skip
+      'Price' => '50'
+    });
+    Test.startTest();
+    Integer count = ResourceRoleController.importResourceRoles(data);
+    Test.stopTest();
+    System.assertEquals(1, count);
+    Resource_Role__c result = [SELECT Price__c FROM Resource_Role__c WHERE Name = 'Imported Role'];
+    System.assertEquals(150, result.Price__c);
+  }
 }
