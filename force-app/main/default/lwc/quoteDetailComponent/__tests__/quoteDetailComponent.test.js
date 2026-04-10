@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import QuoteDetailComponent from "c/quoteDetailComponent";
 import getQuoteById from "@salesforce/apex/QuoteService.getQuoteById";
 

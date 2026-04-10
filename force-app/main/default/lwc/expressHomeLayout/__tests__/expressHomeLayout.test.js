@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import ExpressHomeLayout from "c/expressHomeLayout";
 import getOpportunities from "@salesforce/apex/QuoteService.getOpportunities";
 import getCurrentUserRole from "@salesforce/apex/TeamController.getCurrentUserRole";

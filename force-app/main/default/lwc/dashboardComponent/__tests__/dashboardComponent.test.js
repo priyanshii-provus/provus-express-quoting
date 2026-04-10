@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import DashboardComponent from "c/dashboardComponent";
 import getQuoteInsights from "@salesforce/apex/DashboardController.getQuoteInsights";
 import getRecentQuotes from "@salesforce/apex/DashboardController.getRecentQuotes";

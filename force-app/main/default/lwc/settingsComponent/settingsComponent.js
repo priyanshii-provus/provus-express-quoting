@@ -117,7 +117,6 @@ export default class SettingsComponent extends LightningElement {
     this.companySettings = { ...this.companySettings, [field]: value };
   }
 
-
   async loadPdfVersions() {
     this.isPdfLoading = true;
     try {
@@ -209,13 +208,13 @@ export default class SettingsComponent extends LightningElement {
     return this.activeTab === "Users";
   }
 
-  get generalMenuClass() {
+  get generalTabClass() {
     return `sidebar-item ${this.activeTab === "General" ? "active" : ""}`;
   }
-  get pdfMenuClass() {
+  get pdfTabClass() {
     return `sidebar-item ${this.activeTab === "PDF" ? "active" : ""}`;
   }
-  get usersMenuClass() {
+  get teamTabClass() {
     return `sidebar-item ${this.activeTab === "Users" ? "active" : ""}`;
   }
 
@@ -275,8 +274,6 @@ export default class SettingsComponent extends LightningElement {
   get userOptionClass() {
     return `role-option${this.isRoleUser ? " selected" : ""}`;
   }
-
-
 
   // ── Team Member Handlers ───────────────
   handleAddMember() {

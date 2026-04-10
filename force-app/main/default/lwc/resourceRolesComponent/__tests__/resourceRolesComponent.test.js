@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import ResourceRolesComponent from "c/resourceRolesComponent";
 import getResourceRoles from "@salesforce/apex/ResourceRoleController.getResourceRoles";
 import createResourceRole from "@salesforce/apex/ResourceRoleController.createResourceRole";
@@ -85,10 +85,8 @@ describe("c-resource-roles-component", () => {
     // Wait for any initial rendering
     await Promise.resolve();
 
-    // Click "New Resource Role"
-    const addBtn = element.shadowRoot.querySelector(
-      'lightning-button[data-id="newButton"]'
-    );
+    // Click "New Resource Role" button (native <button> with class .new-role-btn)
+    const addBtn = element.shadowRoot.querySelector("button.new-role-btn");
     addBtn.click();
 
     await Promise.resolve();

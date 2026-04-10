@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import QuoteLineItemsComponent from "c/quoteLineItemsComponent";
 import getQuoteById from "@salesforce/apex/QuoteService.getQuoteById";
 import getQuoteLineItems from "@salesforce/apex/QuoteService.getQuoteLineItems";

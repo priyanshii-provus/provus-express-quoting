@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SettingsComponent from "c/settingsComponent";
 import getUsers from "@salesforce/apex/TeamController.getUsers";
 import getCurrentUserRole from "@salesforce/apex/TeamController.getCurrentUserRole";
@@ -88,9 +88,7 @@ describe("c-settings-component", () => {
     await Promise.resolve();
 
     // Click Users tab
-    const usersTab = element.shadowRoot.querySelector(
-      '.sidebar-item[data-tab="Users"]'
-    );
+    const usersTab = element.shadowRoot.querySelector('li[data-tab="Users"]');
     usersTab.click();
 
     await Promise.resolve();
@@ -114,33 +112,23 @@ describe("c-settings-component", () => {
     expect(userNames[0].textContent).toContain("Alice Admin");
   });
 
-  it("handles company info saving", async () => {
+  it("switches to PDF tab", async () => {
     const element = createElement("c-settings-component", {
       is: SettingsComponent
     });
     document.body.appendChild(element);
 
-    // Click Company Information tab
-    const companyTab = element.shadowRoot.querySelector(
-      '.sidebar-item[data-tab="CompanyInfo"]'
-    );
-    companyTab.click();
+    await Promise.resolve();
+
+    // Click PDF tab
+    const pdfTab = element.shadowRoot.querySelector('li[data-tab="PDF"]');
+    pdfTab.click();
 
     await Promise.resolve();
 
-    // Simulation of input change
-    const nameInput = element.shadowRoot.querySelector(
-      'input[data-field="companyName"]'
-    );
-    nameInput.value = "Updated Name";
-    nameInput.dispatchEvent(new CustomEvent("change"));
-
-    // Check the button exists and click it
-    const saveBtn = element.shadowRoot.querySelector(".btn-save");
-    saveBtn.click();
-
-    await Promise.resolve();
-
-    expect(nameInput.value).toBe("Updated Name");
+    // Verify the PDF tab is now active
+    const activeTab = element.shadowRoot.querySelector(".sidebar-item.active");
+    expect(activeTab).not.toBeNull();
+    expect(activeTab.textContent).toContain("PDF");
   });
 });

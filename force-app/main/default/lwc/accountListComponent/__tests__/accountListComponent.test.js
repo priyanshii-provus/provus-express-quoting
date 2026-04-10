@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import AccountListComponent from "c/accountListComponent";
 import getAccounts from "@salesforce/apex/AccountController.getAccounts";
 import deleteAccount from "@salesforce/apex/AccountController.deleteAccount";

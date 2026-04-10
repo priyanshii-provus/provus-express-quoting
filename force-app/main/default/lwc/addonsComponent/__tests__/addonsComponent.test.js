@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import AddonsComponent from "c/addonsComponent";
 import getAddons from "@salesforce/apex/AddonController.getAddons";
 import createAddon from "@salesforce/apex/AddonController.createAddon";
@@ -84,10 +84,8 @@ describe("c-addons-component", () => {
     // Wait for any initial rendering
     await Promise.resolve();
 
-    // Click "New Add-on" button
-    const addBtn = element.shadowRoot.querySelector(
-      'lightning-button[data-id="newButton"]'
-    );
+    // Click "New Add-on" button (native <button> with class .new-addon-btn)
+    const addBtn = element.shadowRoot.querySelector("button.new-addon-btn");
     addBtn.click();
 
     await Promise.resolve();

@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import ProductsComponent from "c/productsComponent";
 import getProducts from "@salesforce/apex/ProductController.getProducts";
 import createProduct from "@salesforce/apex/ProductController.createProduct";
@@ -84,10 +84,8 @@ describe("c-products-component", () => {
     // Wait for any initial rendering
     await Promise.resolve();
 
-    // Click "New Product" button
-    const addBtn = element.shadowRoot.querySelector(
-      'lightning-button[data-id="newButton"]'
-    );
+    // Click "New Product" button (native <button> with class .new-product-btn)
+    const addBtn = element.shadowRoot.querySelector("button.new-product-btn");
     addBtn.click();
 
     await Promise.resolve();

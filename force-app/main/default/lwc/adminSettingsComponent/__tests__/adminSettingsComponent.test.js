@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import AdminSettingsComponent from "c/adminSettingsComponent";
 import getUsers from "@salesforce/apex/TeamController.getUsers";
 
