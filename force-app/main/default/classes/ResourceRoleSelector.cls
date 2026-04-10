@@ -1,3 +1,6 @@
+/**
+ * @description Selector class for querying Resource Role records.
+ */
 public inherited sharing class ResourceRoleSelector {
   public static List<Resource_Role__c> getResourceRoles(Boolean activeOnly) {
     String query =

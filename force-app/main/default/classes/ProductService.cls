@@ -1,3 +1,7 @@
+/**
+ * @description Service class orchestrating business logic and DML operations for Products.
+ * Acts as the intermediary layer between the Controller and Selector/DML operations.
+ */
 public inherited sharing class ProductService {
 
   public static Product2 createProduct(

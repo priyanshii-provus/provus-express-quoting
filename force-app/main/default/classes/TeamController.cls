@@ -185,6 +185,8 @@ public with sharing class TeamController {
         LastName = lastName,
         Email = email
       );
+      // Ensure permission sets are updated
+      syncPermissionSet(userId, newRole);
     } catch (Exception e) {
       AuraHandledException ex = new AuraHandledException(e.getMessage());
       ex.setMessage(e.getMessage());
@@ -235,6 +237,10 @@ public with sharing class TeamController {
       );
       if (throwTestException) throw new DmlException('Simulated test exception');
       insert newUser;
+      
+      // Assign appropriate permission set for app access
+      syncPermissionSet(newUser.Id, newRole);
+
       // Send password reset / setup email so user can log in
       if (!Test.isRunningTest()) {
         System.resetPassword(newUser.Id, true);
@@ -316,5 +322,45 @@ public with sharing class TeamController {
       (u.Name.toLowerCase().contains('security user') ||
       u.Name.toLowerCase().contains('integration user')) ||
       userType != 'Standard';
+  }
+
+  /**
+   * Helper to assign/remove permission sets based on the user's Express Role.
+   */
+  private static void syncPermissionSet(Id userId, String role) {
+    String psName = (role == 'Admin' || role == 'Manager') 
+      ? 'Provus_Quote_Manager' 
+      : 'Provus_Quote_User';
+    
+    String otherPsName = (psName == 'Provus_Quote_Manager') 
+      ? 'Provus_Quote_User' 
+      : 'Provus_Quote_Manager';
+
+    // Get PS IDs
+    Map<String, Id> psMap = new Map<String, Id>();
+    for (PermissionSet ps : [SELECT Id, Name FROM PermissionSet WHERE Name IN ('Provus_Quote_Manager', 'Provus_Quote_User')]) {
+      psMap.put(ps.Name, ps.Id);
+    }
+
+    if (!psMap.containsKey(psName)) return;
+
+    // Remove the inverse permission set if it exists (to handle role swaps)
+    List<PermissionSetAssignment> toDelete = [
+      SELECT Id FROM PermissionSetAssignment 
+      WHERE AssigneeId = :userId AND PermissionSetId = :psMap.get(otherPsName)
+    ];
+    if (!toDelete.isEmpty()) delete toDelete;
+
+    // Add the correct one if not already there
+    List<PermissionSetAssignment> existing = [
+      SELECT Id FROM PermissionSetAssignment 
+      WHERE AssigneeId = :userId AND PermissionSetId = :psMap.get(psName)
+    ];
+    if (existing.isEmpty()) {
+      insert new PermissionSetAssignment(
+        AssigneeId = userId,
+        PermissionSetId = psMap.get(psName)
+      );
+    }
   }
 }

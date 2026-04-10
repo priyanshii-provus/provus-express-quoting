@@ -131,4 +131,32 @@ describe("c-settings-component", () => {
     expect(activeTab).not.toBeNull();
     expect(activeTab.textContent).toContain("PDF");
   });
+
+  it("switches to Company Information tab", async () => {
+    const element = createElement("c-settings-component", {
+      is: SettingsComponent
+    });
+    document.body.appendChild(element);
+
+    await Promise.resolve();
+
+    // Click Company tab
+    const companyTab = element.shadowRoot.querySelector(
+      'li[data-tab="CompanyInfo"]'
+    );
+    companyTab.click();
+
+    await Promise.resolve();
+
+    // Verify content header
+    const header = element.shadowRoot.querySelector(".content-heading");
+    expect(header.textContent).toBe("Company Information");
+
+    // Verify a field is rendered
+    const nameInput = element.shadowRoot.querySelector(
+      'input[data-field="companyName"]'
+    );
+    expect(nameInput).not.toBeNull();
+    expect(nameInput.value).toBe("Provus Inc");
+  });
 });

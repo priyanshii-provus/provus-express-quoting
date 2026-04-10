@@ -1,3 +1,8 @@
+/**
+ * @description Core service class for Quote operations.
+ * Handles the creation, retrieval, and complex updates of Quote and QuoteLineItem records.
+ * Uses without sharing due to specific business requirements for Quote access.
+ */
 public without sharing class QuoteService {
   @AuraEnabled(cacheable=true)
   public static List<Opportunity> getOpportunities() {

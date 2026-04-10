@@ -1,9 +1,16 @@
 <template>
   <div class="quote-detail-wrapper">
+    <!-- Loading Spinner Overlay -->
+    <template if:true={isSaving}>
+      <div class="saving-overlay">
+        <lightning-spinner alternative-text="Saving..." size="medium" variant="brand"></lightning-spinner>
+      </div>
+    </template>
+
     <!-- ─── Breadcrumb Header ─── -->
     <div class="breadcrumb-header">
       <div class="breadcrumb-left">
-        <button class="back-btn" onclick={handleBackToQuotes}>
+        <button class="back-btn" onclick={handleBackToQuotes} disabled={isSaving}>
           <lightning-icon
             icon-name="utility:chevronleft"
             size="xx-small"
@@ -24,12 +31,14 @@
           <lightning-button
             label="Submit for Approval"
             onclick={openSubmitModal}
+            disabled={isSaving}
           ></lightning-button>
         </template>
         <template if:true={canRecall}>
           <lightning-button
             label="Recall"
             onclick={handleRecall}
+            disabled={isSaving}
           ></lightning-button>
         </template>
         <template if:true={canApproveReject}>
@@ -38,11 +47,13 @@
             label="Approve"
             onclick={openApproveModal}
             class="success-btn"
+            disabled={isSaving}
           ></lightning-button>
           <lightning-button
             variant="destructive"
             label="Reject"
             onclick={openRejectModal}
+            disabled={isSaving}
           ></lightning-button>
         </template>
         <lightning-button
@@ -57,12 +68,14 @@
           label="Analyze Quote Health"
           onclick={handleAnalyzeHealth}
           class="slds-m-right_x-small slds-m-left_x-small"
+          disabled={isSaving}
         ></lightning-button>
         <template if:false={isLocked}>
           <lightning-button
             variant="brand"
             label="Save"
             onclick={handleSave}
+            disabled={isSaving}
           ></lightning-button>
         </template>
         <lightning-button-icon
@@ -70,6 +83,7 @@
           alternative-text="Refresh"
           onclick={handleRefresh}
           variant="border-filled"
+          disabled={isSaving}
         ></lightning-button-icon>
       </div>
     </div>

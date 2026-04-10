@@ -1,3 +1,6 @@
+/**
+ * @description Service class managing business logic and DML operations for Add-on records.
+ */
 public inherited sharing class AddonService {
   public static Add_on__c createAddon(
     String name,
